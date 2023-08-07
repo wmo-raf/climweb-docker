@@ -164,7 +164,7 @@ def make(args) -> None:
 
     if args.command == "config":
 
-        run(args, split(f'docker-compose {DOCKER_COMPOSE_ARGS} config'))
+        run(args, split(f'docker compose {DOCKER_COMPOSE_ARGS} config'))
 
     elif args.command == "execute":
         run(args, ['docker', 'exec', '-i', 'cms_web', 'sh', '-c', containers])
@@ -178,15 +178,15 @@ def make(args) -> None:
     elif args.command == "logs":
 
         run(args, split(
-            f'docker-compose {DOCKER_COMPOSE_ARGS} logs --follow {containers}'))
+            f'docker compose {DOCKER_COMPOSE_ARGS} logs --follow {containers}'))
         
     elif args.command in ["stop", "down"]:
 
         if containers:
-            run(args, split(f"docker-compose {DOCKER_COMPOSE_ARGS} {containers}"))
+            run(args, split(f"docker compose {DOCKER_COMPOSE_ARGS} {containers}"))
         else:
             run(args, split(
-                f'docker-compose {DOCKER_COMPOSE_ARGS} down --remove-orphans {containers}')) 
+                f'docker compose {DOCKER_COMPOSE_ARGS} down --remove-orphans {containers}')) 
     elif args.command == "prune":
         run(args, split('docker builder prune -f'))
         run(args, split('docker container prune -f'))
@@ -200,25 +200,25 @@ def make(args) -> None:
     
     elif args.command == "status":
         run(args, split(
-            f'docker-compose {DOCKER_COMPOSE_ARGS} ps {containers}'))
+            f'docker compose {DOCKER_COMPOSE_ARGS} ps {containers}'))
         
     elif args.command == "launch":
 
         print(f"{GREEN}RUNNING QUICKSTART INSTANCE {RESET}")
         print(f"{YELLOW}=> [1/2] BUILDING CONTAINERS {RESET}")
         run(args, split(
-            f'docker-compose {DOCKER_COMPOSE_ARGS} build {containers}'))
+            f'docker compose {DOCKER_COMPOSE_ARGS} build {containers}'))
         
         print(f"{YELLOW}=> [2/2] STARTING UP CONTAINERS {RESET}")
         run(args, split(
-            f'docker-compose {DOCKER_COMPOSE_ARGS} up -d'))
+            f'docker compose {DOCKER_COMPOSE_ARGS} up -d'))
         
         print(f"{GREEN}\u2713 OPERATION HAS BEEN COMPLETED {RESET}")
     
     elif args.command == "createsuperuser":
 
         run(args, split(
-            f'docker-compose {DOCKER_COMPOSE_ARGS} exec cms_web python manage.py createsuperuser'))
+            f'docker compose {DOCKER_COMPOSE_ARGS} exec cms_web python manage.py createsuperuser'))
         
     elif args.command == "setup_db":
         print(f"{MAGENTA}Setting up PostgreSQL Configs...{RESET}")
@@ -240,10 +240,10 @@ def make(args) -> None:
         print(f"{MAGENTA}\u2713 Completed Mautic Setup... {CYAN}'Reloading containers{RESET}")
 
         run(args, split(
-            f'docker-compose --file docker-compose.mautic.yml --file docker-compose.yml {DOCKER_COMPOSE_ARGS} build {containers}'))
+            f'docker compose --file docker-compose.mautic.yml --file docker-compose.yml {DOCKER_COMPOSE_ARGS} build {containers}'))
         
         run(args, split(
-            f'docker-compose --file docker-compose.mautic.yml --file docker-compose.yml {DOCKER_COMPOSE_ARGS} up -d'))
+            f'docker compose --file docker-compose.mautic.yml --file docker-compose.yml {DOCKER_COMPOSE_ARGS} up -d'))
 
     
     elif args.command == "setup_recaptcha":
@@ -255,10 +255,10 @@ def make(args) -> None:
         print(f"{MAGENTA}\u2713 Completed Recaptcha Setup... Run {CYAN}'python3 nmhs-ctl.py launch' to reload changes{RESET}")
 
         run(args, split(
-            f'docker-compose {DOCKER_COMPOSE_ARGS} build {containers}'))
+            f'docker compose {DOCKER_COMPOSE_ARGS} build {containers}'))
         
         run(args, split(
-            f'docker-compose {DOCKER_COMPOSE_ARGS} up -d'))
+            f'docker compose {DOCKER_COMPOSE_ARGS} up -d'))
 
     elif args.command == "setup_cms":
         print(f"{MAGENTA}Setting up CMS Configs...{RESET}")
