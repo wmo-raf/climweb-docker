@@ -1,0 +1,13 @@
+cms/media/
+cms/static/
+cms/error.log
+cms/cache/
+cms/db-data/
+
+mautic/mautic_data/
+mautic/mysql_data/
+
+mapviewer/.next/
+
+
+.env

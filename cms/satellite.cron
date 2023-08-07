@@ -1,0 +1,1 @@
+*/15 * * * * cd /home/app/web && python3 manage.py process_tasks --duration 15 > /proc/1/fd/1 2>/proc/1/fd/2
