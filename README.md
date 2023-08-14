@@ -47,6 +47,10 @@ The `quickstart` arguement in `nmhs-ctl.py` deploys nmhs-cms with test data with
    
     `docker compose up -d`
 
+   or
+   
+   `python3 nmhs-ctl.py quickstart`
+
     These commands executes the following steps:
 
     ```py
@@ -103,22 +107,22 @@ as `docker-compose.yml` file
 | BITLY_TOKEN                  | [Bitly](https://bitly.com/) access token. The MapViewer uses Bitly for url shortening. See [here](https://dev.bitly.com/docs/getting-started/authentication/) on how to generate one |
 | ANALYTICS_PROPERTY_ID        |                                                                                                                                                                                      |
 | GOOGLE_CUSTOM_SEARCH_CX      |                                                                                                                                                                                      |
-| GOOGLE_SEARCH_API_KEY        |              
+| GOOGLE_SEARCH_API_KEY        |      |                                                 
 
-## Other useful commands
+## Other useful commands with python3 nmhs-ctl.py {command}
 
-     | Command           | Purpose                                                                                                                                                                                                              |
------|-------------------|----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|----
-     | `config`          | validate and view the Compose file configuration                                                                                                                                                                     |
-     | `login`           | interact with the container's command line and execute commands as if you were directly logged into the container                                                                                                    |
-     | `login-root`      | access a running Docker container and open a Bash shell inside it with the root user                                                                                                                                 |
-     | `logs`            | real-time output of the containers' logs                                                                                                                                                                             |
-     | `stop/down`       | stop and remove Docker containers                                                                                                                                                                                    |
-     | `prune`           | clean up unused Docker resources such as containers, images, networks, and volumes. ***Exercise caution when using these commands and ensure that you do not accidentally remove resources that are still needed.*** |
-     | `status`          | display container names, their status (running, stopped), the associated services, and their respective health states                                                                                                |
-     | `forecast`        | fetch 7-day forecast from external source (https://developer.yr.no/)                                                                                                                                                 |
-     | `setup_mautic`    | setup mautic environmental variables i.e `MAUTIC_DB_USER`,`MAUTIC_DB_PASSWORD` and  `MYSQL_ROOT_PASSWORD`,                                                                                                           |
-<!-- | `setup_recaptcha` | setup recaptcha environmental variables i.e `RECAPTCHA_PRIVATE_KEY` and `RECAPTCHA_PUBLIC_KEY`                                                                                                                       |
-     | `setup_cms`       | setting up CMS Configs                                                                                                                                                                                               |
-     | `setup_db`        | Setting up PostgreSQL Configs                                                                                                                                                                                        | -->
+| Command           | Purpose        |                                                                                                                                                                                                      
+|-------------------|----------------------------------------------------------------------------------------|
+ | `config`          | validate and view the Compose file configuration               |
+ | `login`           | interact with the container's command line and execute commands as if you were directly logged into the container |
+ | `login-root`      | access a running Docker container and open a Bash shell inside it with the root user                                                                                                                                
+ | `logs`            | real-time output of the containers' logs                                   |
+ | `stop/down`       | stop and remove Docker containers                                          |
+ | `prune`           | clean up unused Docker resources such as containers, images, networks, and volumes. ***Exercise caution when using these commands and ensure that you do not accidentally remove resources that are still needed.*** |
+ | `status`          | display container names, their status (running, stopped), the associated services, and their respective health states  |
+ | `forecast`        | fetch 7-day forecast from external source (https://developer.yr.no/)       |
+ | `setup_mautic`    | setup mautic environmental variables i.e `MAUTIC_DB_USER`,`MAUTIC_DB_PASSWORD` and  `MYSQL_ROOT_PASSWORD`,   |
+<!-- | `setup_recaptcha` | setup recaptcha environmental variables i.e `RECAPTCHA_PRIVATE_KEY` and `RECAPTCHA_PUBLIC_KEY`|
+ | `setup_cms`       | setting up CMS Configs                                                     |
+ | `setup_db`        | Setting up PostgreSQL Configs                                                 | -->
 
