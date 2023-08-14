@@ -99,7 +99,8 @@ as `docker-compose.yml` file
 | RECAPTCHA_PRIVATE_KEY    | Google Recaptcha Private Key                                                                                                                                                                                                                         | NO       |         |                                                                                                       |
 | CMS_NUM_OF_WORKERS       | Gunicorn number of workers. Recommended value should be `(2 x $num_cores) + 1 `. For example, if your server has `4 CPU Cores`, this value should be set to `9`, which is the result of `(2 x 4) + 1 = 9`                                            | YES      |         | [Gunicorn Workers details](https://docs.gunicorn.org/en/latest/design.html#how-many-workers)          |
 | CMS_STATIC_VOLUME        | Mounted docker volume path for persisting CMS static files                                                                                                                                                                                           | YES      |         |                                                                                                       |
-| CMS_MEDIA_VOLUME         | Mounted docker volume path for persisting CMS media files   
+| CMS_MEDIA_VOLUME         | Mounted docker volume path for persisting CMS media files     | YES      |         |                                                                                                       |
+
 ## MapViewer Variables
 
 | Variable                     | Description                                                                                                                                                                          |
