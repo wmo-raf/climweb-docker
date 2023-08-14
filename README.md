@@ -43,18 +43,20 @@ The `quickstart` arguement in `nmhs-ctl.py` deploys nmhs-cms with test data with
 
 2. Build and launch a running instance of the CMS.
 
-    `python3 nmhs-ctl.py launch`
+    `docker compose build`
+   
+    `docker compose up -d`
 
-    The `quickstart` executes the following steps:
+    These commands executes the following steps:
 
     ```py
-    [1/3] BUILDING CONTAINERS
-    [2/3] STARTING UP CONTAINERS 
+    [1/2] BUILDING CONTAINERS
+    [2/2] STARTING UP CONTAINERS 
     ```
 
     The instance can be found at `http://localhost:{CMS_PORT}`
 
-3. Additionally, create superuser to access the CMS Admin interface:
+4. Additionally, create superuser to access the CMS Admin interface:
 
     `python3 nmhs-ctl.py createsuperuser`
 
