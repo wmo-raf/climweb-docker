@@ -12,13 +12,9 @@ Read more from the user guide - [nmhs-cms.readthedocs.io](https://nmhs-cms.readt
 
 ## Prerequisites
 
-Before installing the CMS, there are a few prerequisites to consider installing on your server:
+Before installing the CMS, consider installing on your server:
 
-1. **Docker Engine :** Ensure that Docker Engine is installed and running on the machine where you plan to execute the docker-compose command https://docs.docker.com/engine/install/. Docker Engine is the runtime environment for containers.
-
-2. **Docker Compose (step 1-3):** Install Docker Compose https://docs.docker.com/compose/install/linux on the machine where you intend to run the command. Docker Compose is a tool that allows you to define and manage multi-container Docker applications using a YAML configuration file.
-
-3. **Python 3:** Ensure that Python 3 is installed on your machine. Visit (https://realpython.com/installing-python/) and follow the installation instructions for your operating system.
+**Docker Engine & Docker Compose Plugin :** Ensure that Docker Engine is installed and running on the machine where you plan to execute the docker-compose command https://docs.docker.com/engine/install/. Docker Engine is the runtime environment for containers.
 
 ---
 ## Quickstart Installation with Test Data
