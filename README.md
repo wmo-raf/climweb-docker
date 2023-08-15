@@ -17,48 +17,59 @@ Before installing the CMS, consider installing on your server:
 **Docker Engine & Docker Compose Plugin :** Ensure that Docker Engine is installed and running on the machine where you plan to execute the docker-compose command https://docs.docker.com/engine/install/. Docker Engine is the runtime environment for containers.
 
 ---
-## Quickstart Installation with Test Data
-
-The `quickstart` arguement in `nmhs-ctl.py` deploys nmhs-cms with test data with a single command and requires python3 setup. When using nmhs-cms from source, the default port for web components is 3031.
+## CMS Installation Instructions
 
 1. Download from source:
 
-    `git clone https://github.com/wmo-raf/nmhs-cms-init.git`
+    ```sh
+   git clone https://github.com/wmo-raf/nmhs-cms-init.git
+    ```
 
-    `cd nmhs-cms-init`
+    ```sh
+   cd nmhs-cms-init
+    ```
 
-2. Setup environmental variables
+3. Setup environmental variables
 
     Prepare a '.env' file with necessary variables from '.env.sample'
 
-    `cp .env.sample .env`
+    ```sh
+   cp .env.sample .env
+    ```
 
-   `nano .env`
+   ```sh
+   nano .env
+   ```
 
     Edit and replace variables approriately. See [environmental variables section](#environmental-variables) below
 
 2. Build and launch a running instance of the CMS.
 
-    `docker compose build`
+    ```sh
+    docker compose build
+    ```
    
-    `docker compose up -d`
-
-   or
-   
-   `python3 nmhs-ctl.py quickstart`
-
-    These commands executes the following steps:
-
-    ```py
-    [1/2] BUILDING CONTAINERS
-    [2/2] STARTING UP CONTAINERS 
+    ```sh
+    docker compose up -d
     ```
 
     The instance can be found at `http://localhost:{CMS_PORT}`
 
 4. Additionally, create superuser to access the CMS Admin interface:
 
-    `python3 nmhs-ctl.py createsuperuser`
+    Log in to container interactive command line interface
+    
+    ```sh
+   docker exec -it cms_web /bin/bash
+    ```
+
+    Create superuser providing username, email and strong password
+
+    ```sh
+   python manage.py createsuperuser
+    ```
+   
+    The admin instance can be found at `http://localhost:{CMS_PORT}/{CMS_ADMIN_URL_PATH}`
 
 ---
 
@@ -108,20 +119,16 @@ as `docker-compose.yml` file
 | GOOGLE_CUSTOM_SEARCH_CX      |                                                                                                                                                                                      |
 | GOOGLE_SEARCH_API_KEY        |      |                                                 
 
-## Other useful commands with python3 nmhs-ctl.py {command}
+## Other useful commands 
 
-| Command           | Purpose        |                                                                                                                                                                                                      
-|-------------------|----------------------------------------------------------------------------------------|
- | `config`          | validate and view the Compose file configuration               |
- | `login`           | interact with the container's command line and execute commands as if you were directly logged into the container |
- | `login-root`      | access a running Docker container and open a Bash shell inside it with the root user                                                                                                                                
- | `logs`            | real-time output of the containers' logs                                   |
- | `stop/down`       | stop and remove Docker containers                                          |
- | `prune`           | clean up unused Docker resources such as containers, images, networks, and volumes. ***Exercise caution when using these commands and ensure that you do not accidentally remove resources that are still needed.*** |
- | `status`          | display container names, their status (running, stopped), the associated services, and their respective health states  |
- | `forecast`        | fetch 7-day forecast from external source (https://developer.yr.no/)       |
- | `setup_mautic`    | setup mautic environmental variables i.e `MAUTIC_DB_USER`,`MAUTIC_DB_PASSWORD` and  `MYSQL_ROOT_PASSWORD`,   |
-<!-- | `setup_recaptcha` | setup recaptcha environmental variables i.e `RECAPTCHA_PRIVATE_KEY` and `RECAPTCHA_PUBLIC_KEY`|
- | `setup_cms`       | setting up CMS Configs                                                     |
- | `setup_db`        | Setting up PostgreSQL Configs                                                 | -->
+| Purpose           | Command |  Instructions        |                                                                                                                                                                                                      
+|-------------------|-----------|-----------------------------------------------------------------------------|
+| docker configurations          | `docker compose config` | validate and view the Compose file configuration               |
+| login to shell          | `docker exec -it {container} /bin/bash` | interact with the container's command line and execute commands as if you were directly logged into the container |
+| login to shell as root user      | `docker exec -u -0 -it {container} /bin/bash` | access a running Docker container and open a Bash shell inside it with the root user                                                                                                                                
+| read docker logs            | `docker compose logs --follow {containers}` | real-time output of the containers' logs                                   |
+| stop/remove docker containers       | `docker compose down --remove-orphans {containers}` | stop and remove Docker containers                                          |
+| check containers status          | `docker compose  ps {containers}` | display container names, their status (running, stopped), the associated services, and their respective health states  |
+| generate city forecasts from external source        | use the `login` command above and execute `python manage.py generate_forecast` | used for fetching 7-day forecast from external source (https://developer.yr.no/)       |
+| setup mautic instance    | `docker compose --file docker-compose.mautic.yml --file docker-compose.yml build {containers}` followed by `docker compose --file docker-compose.mautic.yml --file docker-compose.yml {DOCKER_COMPOSE_ARGS} up -d` | setup mautic environmental variables i.e `MAUTIC_DB_USER`,`MAUTIC_DB_PASSWORD` and  `MYSQL_ROOT_PASSWORD`  then execute command |
 
