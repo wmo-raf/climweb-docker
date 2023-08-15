@@ -272,26 +272,26 @@ def make(args) -> None:
 if __name__ == "__main__":
 
     # create production ready files from sample files 
-    config_files ={
-        'error_log':{
-            'source':'./cms/error.log.sample',
-            'target':'./cms/error.log',
-            'overwrite':True
-        },
-    }
+    # config_files ={
+    #     'error_log':{
+    #         'source':'./cms/error.log.sample',
+    #         'target':'./cms/error.log',
+    #         'overwrite':True
+    #     },
+    # }
 
-    for config in config_files:
-        sample_file = config_files[config]['source']
-        prod_file = config_files[config]['target']
+    # for config in config_files:
+    #     sample_file = config_files[config]['source']
+    #     prod_file = config_files[config]['target']
 
 
-        if not os.path.exists(prod_file): 
-            # create file if it does not exist
-            shutil.copy(sample_file, prod_file)
-            print(f"{prod_file} file created from {sample_file}.")
-        elif os.path.exists(prod_file) and config_files[config]['overwrite']:
-            # overwrite file if it exists and overwrite mode is enabled
-            shutil.copy(sample_file, prod_file)
-            print(f"{prod_file} file created from {sample_file}.")
+    #     if not os.path.exists(prod_file): 
+    #         # create file if it does not exist
+    #         shutil.copy(sample_file, prod_file)
+    #         print(f"{prod_file} file created from {sample_file}.")
+    #     elif os.path.exists(prod_file) and config_files[config]['overwrite']:
+    #         # overwrite file if it exists and overwrite mode is enabled
+    #         shutil.copy(sample_file, prod_file)
+    #         print(f"{prod_file} file created from {sample_file}.")
             
     make(args)
