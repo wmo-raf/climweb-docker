@@ -32,7 +32,7 @@ services:
         args:
           - CMS_VERSION=${CMS_VERSION}
     restart: always
-    command: sh -c "/wait && gunicorn nmhs_cms.wsgi:application --bind 0.0.0.0:8000 --workers=${CMS_NUM_OF_WORKERS}" 
+    command: sh -c "/wait && ./entrypoint.sh && gunicorn nmhs_cms.wsgi:application --bind 0.0.0.0:8000 --workers=${CMS_NUM_OF_WORKERS}" 
     expose:
       - "8000"
     environment: 
