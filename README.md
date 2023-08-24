@@ -177,7 +177,7 @@ startretries=3
 
 Save the file.
 
-After creating the configuration, tell `supervisord`` to refresh its configuration and start the service:
+After creating the configuration, tell `supervisord` to refresh its configuration and start the service:
 
 ```
 sudo superviserctl reread
