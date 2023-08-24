@@ -190,7 +190,7 @@ If everything is ok, `Webhook` is now set and ready to be used.
 
 You can now set the  `CMS_UPGRADE_HOOK_URL` env variable to:
 
-`http://host.docker.internal/9000/cms-upgrade`
+`http://host.docker.internal:9000/hooks/cms-upgrade`
 
 Note this a special docker network url accessed only from inside the `cms_web` docker container.
 
