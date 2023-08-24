@@ -149,11 +149,51 @@ This will create a new file `webhook/hooks.yaml` with the correct paths in place
 
 We will use this file to run [Webhook](https://github.com/adnanh/webhook)
 
-To do so, start `webhook` with:
+
+### Running Webhook server with Supervisor
+
+Install supervisor to keep the webhook server running in the background.
 
 ```
-webhook -hooks /path_to_project_dir/webhook/hooks.yaml -verbose
+sudo apt install supervisor
 ```
+
+Create a `webhook.conf` file in `/etc/supervisor/conf.d/`
+
+```
+cd /etc/supervisor/conf.d
+sudo nano webhooks.conf
+```
+
+Add the following inside the `webhook.conf` file
+
+```
+[program:webhook]
+command=webhook -hooks /path_to_project_dir/webhook/hooks.yaml -verbose
+autostart=true
+autorestart=true
+startretries=3
+```
+
+Save the file
+
+After creating the configuration, tell supervisord to refresh its configuration and start the service:
+
+```
+sudo superviserctl reread
+sudo superviserctl update
+sudo supervisorctl status
+```
+
+If everything is ok, Webhook is not set and ready to be used.
+
+
+You can now set the  `CMS_UPGRADE_HOOK_URL` env variable to:
+
+`http://host.docker.internal/9000/cms-upgrade`
+
+Note this a special docker network url accessed only from inside the `cms_web` docker container.
+
 
 ## Other useful commands 
 
