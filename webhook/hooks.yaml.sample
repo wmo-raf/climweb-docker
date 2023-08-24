@@ -1,0 +1,19 @@
+- id: cms-upgrade
+  execute-command: WORKING_DIR/webhook/scripts/cms-upgrade.sh
+  command-working-directory: "WORKING_DIR"
+  response-message: "CMS Upgrade command sent successfully"
+  http-methods:
+    - POST
+  incoming-payload-content-type: "application/json"
+  pass-arguments-to-command:
+    - source: payload
+      name: latest_version
+  trigger-rule:
+    and:
+      - match:
+          type: regex
+          regex: ^.+
+          parameter:
+            source: payload
+            name: latest_version
+  trigger-rule-mismatch-http-response-code: 400
