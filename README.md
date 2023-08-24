@@ -162,7 +162,7 @@ Create a `webhook.conf` file in `/etc/supervisor/conf.d/`
 
 ```
 cd /etc/supervisor/conf.d
-sudo nano webhooks.conf
+sudo nano webhook.conf
 ```
 
 Add the following inside the `webhook.conf` file
@@ -175,9 +175,9 @@ autorestart=true
 startretries=3
 ```
 
-Save the file
+Save the file.
 
-After creating the configuration, tell supervisord to refresh its configuration and start the service:
+After creating the configuration, tell `supervisord`` to refresh its configuration and start the service:
 
 ```
 sudo superviserctl reread
@@ -185,7 +185,7 @@ sudo superviserctl update
 sudo supervisorctl status
 ```
 
-If everything is ok, Webhook is not set and ready to be used.
+If everything is ok, `Webhook` is now set and ready to be used.
 
 
 You can now set the  `CMS_UPGRADE_HOOK_URL` env variable to:
