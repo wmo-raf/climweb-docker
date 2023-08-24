@@ -3,11 +3,14 @@ cms/static/
 cms/error.log
 cms/cache/
 cms/db-data/
+cms/backup/
 
 mautic/mautic_data/
 mautic/mysql_data/
 
 mapviewer/.next/
+
+hooks.yaml
 
 
 .env

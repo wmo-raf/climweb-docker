@@ -39,6 +39,7 @@ services:
       - WAIT_HOSTS=cms_db:5432,cms_memcached:11211
       - WAIT_TIMEOUT=120
       - DEBUG=${CMS_DEBUG}
+      - CMS_VERSION=${CMS_VERSION}
       - WAGTAIL_SITE_NAME=${CMS_SITE_NAME}
       - ADMIN_URL_PATH=${CMS_ADMIN_URL_PATH}
       - TIME_ZONE=${TIME_ZONE}
@@ -57,6 +58,7 @@ services:
       - RECAPTCHA_PUBLIC_KEY=${RECAPTCHA_PUBLIC_KEY}
       - RECAPTCHA_PRIVATE_KEY=${RECAPTCHA_PRIVATE_KEY}
       - NEXTJS_SERVER_URL=http://cms_mapviewer:3000
+      - CMS_UPGRADE_HOOK_URL=${CMS_UPGRADE_HOOK_URL}
     depends_on:
       - cms_db
     ports:
@@ -64,7 +66,9 @@ services:
     volumes:
       - ${CMS_STATIC_VOLUME}:/home/app/web/static
       - ${CMS_MEDIA_VOLUME}:/home/app/web/media
-      - ${BACKUP_STORAGE_PATH}:/home/app/web/backup
+      - ${BACKUP_VOLUME}:/home/app/web/backup
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   cms_mapviewer:
     container_name: cms_mapviewer
     restart: always

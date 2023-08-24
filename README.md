@@ -107,6 +107,7 @@ as `docker-compose.yml` file
 | CMS_NUM_OF_WORKERS       | Gunicorn number of workers. Recommended value should be `(2 x $num_cores) + 1 `. For example, if your server has `4 CPU Cores`, this value should be set to `9`, which is the result of `(2 x 4) + 1 = 9`                                            | YES      |         | [Gunicorn Workers details](https://docs.gunicorn.org/en/latest/design.html#how-many-workers)          |
 | CMS_STATIC_VOLUME        | Mounted docker volume path for persisting CMS static files                                                                                                                                                                                           | YES      |         |                                                                                                       |
 | CMS_MEDIA_VOLUME         | Mounted docker volume path for persisting CMS media files     | YES      |         |                                                                                                       |
+| CMS_UPGRADE_HOOK_URL     | [Webhook](https://github.com/adnanh/webhook) url to your server that triggers a cms upgrade script      | NO      |         |                                                                                                       |
 
 ## MapViewer Variables
 
@@ -118,6 +119,81 @@ as `docker-compose.yml` file
 | ANALYTICS_PROPERTY_ID        |                                                                                                                                                                                      |
 | GOOGLE_CUSTOM_SEARCH_CX      |                                                                                                                                                                                      |
 | GOOGLE_SEARCH_API_KEY        |      |                                                 
+
+
+
+
+
+
+## Set up Webhook
+
+[Webhook](https://github.com/adnanh/webhook) helps to automate some tasks that otherwise need to be done manually. For example upgrading the CMS to a newer version.
+
+The [Webhook](https://github.com/adnanh/webhook) package needs to be installed on your server (`NOT` in a docker container)
+
+Install the [Webhook](https://github.com/adnanh/webhook) package for your OS as described [here](https://github.com/adnanh/webhook/tree/master#using-package-manager)
+
+If on Ubuntu or Debian, you can run:
+
+```
+sudo apt-get install webhook
+```
+
+From the root project directory (where you cloned this project) run:
+
+```
+sh webhook-config.sh
+```
+
+This will create a new file `webhook/hooks.yaml` with the correct paths in place, using the `webhook/hooks.yaml.sample` file
+
+We will use this file to run [Webhook](https://github.com/adnanh/webhook)
+
+
+### Running Webhook server with Supervisor
+
+Install supervisor to keep the webhook server running in the background.
+
+```
+sudo apt install supervisor
+```
+
+Create a `webhook.conf` file in `/etc/supervisor/conf.d/`
+
+```
+cd /etc/supervisor/conf.d
+sudo nano webhook.conf
+```
+
+Add the following inside the `webhook.conf` file
+
+```
+[program:webhook]
+command=webhook -hooks /path_to_project_dir/webhook/hooks.yaml -verbose
+autostart=true
+autorestart=true
+startretries=3
+```
+
+Save the file.
+
+After creating the configuration, tell `supervisord` to refresh its configuration and start the service:
+
+```
+sudo supervisorctl reread
+sudo supervisorctl update
+sudo supervisorctl status
+```
+
+If everything is ok, `Webhook` is now set and ready to be used.
+
+
+You can now set the  `CMS_UPGRADE_HOOK_URL` env variable to:
+
+`http://host.docker.internal:9000/hooks/cms-upgrade`
+
+Note this a special docker network url accessed only from inside the `cms_web` docker container.
+
 
 ## Other useful commands 
 

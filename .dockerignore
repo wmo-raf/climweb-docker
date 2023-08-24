@@ -37,6 +37,7 @@ wheels/
 *.egg-info/
 .installed.cfg
 *.egg
+.git
 
 # Ignore migration files
 # **/migrations/00**

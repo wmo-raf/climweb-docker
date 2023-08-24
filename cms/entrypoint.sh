@@ -22,4 +22,7 @@ service cron status
 # submit satellite imagery download task
 python manage.py submit_sat_imagery_download
 
+# reset cms upgrade status
+python manage.py reset_cms_upgrade_status
+
 exec "$@"
