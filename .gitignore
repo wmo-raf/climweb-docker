@@ -9,5 +9,7 @@ mautic/mysql_data/
 
 mapviewer/.next/
 
+hooks.yaml
+
 
 .env
