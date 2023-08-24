@@ -64,6 +64,7 @@ services:
     volumes:
       - ${CMS_STATIC_VOLUME}:/home/app/web/static
       - ${CMS_MEDIA_VOLUME}:/home/app/web/media
+      - ${BACKUP_STORAGE_PATH}:/home/app/web/backup
   cms_mapviewer:
     container_name: cms_mapviewer
     restart: always
