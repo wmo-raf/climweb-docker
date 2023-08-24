@@ -108,6 +108,7 @@ as `docker-compose.yml` file
 | CMS_STATIC_VOLUME        | Mounted docker volume path for persisting CMS static files                                                                                                                                                                                           | YES      |         |                                                                                                       |
 | CMS_MEDIA_VOLUME         | Mounted docker volume path for persisting CMS media files     | YES      |         |                                                                                                       |
 | CMS_UPGRADE_HOOK_URL     | [Webhook](https://github.com/adnanh/webhook) url to your server that triggers a cms upgrade script      | NO      |         |                                                                                                       |
+| BACKUP_VOLUME     | Mounted docker volume path for persisting Backup dp and media files      | YES      |         |                                                                                                       |
 
 ## MapViewer Variables
 
