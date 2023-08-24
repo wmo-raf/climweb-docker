@@ -180,8 +180,8 @@ Save the file.
 After creating the configuration, tell `supervisord` to refresh its configuration and start the service:
 
 ```
-sudo superviserctl reread
-sudo superviserctl update
+sudo supervisorctl reread
+sudo supervisorctl update
 sudo supervisorctl status
 ```
 
