@@ -66,6 +66,8 @@ services:
     volumes:
       - ${CMS_STATIC_VOLUME}:/home/app/web/static
       - ${CMS_MEDIA_VOLUME}:/home/app/web/media
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
   cms_mapviewer:
     container_name: cms_mapviewer
     restart: always
