@@ -21,19 +21,28 @@ else
   else
     echo "********* Building cms_web with new version $NEW_CMS_VERSION.... *************"
 
+    # disable exit on error
+    set +e
+
     # build web
     docker compose build cms_web --build-arg CMS_VERSION="$NEW_CMS_VERSION"
 
-    echo "********* Updating env file.... *************"
+    # Check the exit code
+    if [ $? -ne 0 ]; then
+      # restart cms_web to reset upgrade status
+      docker compose restart cms_web
 
-    # replacing CMS_VERSION
-    env_c=$(sed "s/^CMS_VERSION=.*/CMS_VERSION=$NEW_CMS_VERSION/" $env_file)
-    # write new env file
-    echo "$env_c" >$env_file
+    else
+      echo "********* Updating env file.... *************"
 
-    echo "********* Restarting containers.... *************"
+      # replacing CMS_VERSION
+      env_c=$(sed "s/^CMS_VERSION=.*/CMS_VERSION=$NEW_CMS_VERSION/" $env_file)
+      # write new env file
+      echo "$env_c" >$env_file
 
-    # restart
-    docker compose up -d --force-recreate
+      echo "********* Restarting containers.... *************"
+      # restart
+      docker compose up -d --force-recreate
+    fi
   fi
 fi
