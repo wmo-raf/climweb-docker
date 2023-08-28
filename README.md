@@ -1,4 +1,4 @@
-# nmhs-cms-init
+# CMS Installation Guide
 
 Content Management System for NMHSs in Africa
 
