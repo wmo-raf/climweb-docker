@@ -14,7 +14,9 @@ Read more from the user guide - [nmhs-cms.readthedocs.io](https://nmhs-cms.readt
 
 Before installing the CMS, consider installing on your server:
 
-**Docker Engine & Docker Compose Plugin :** Ensure that Docker Engine is installed and running on the machine where you plan to execute the docker-compose command https://docs.docker.com/engine/install/. Docker Engine is the runtime environment for containers.
+1. **Docker Engine & Docker Compose Plugin :** Ensure that Docker Engine is installed and running on the machine where you plan to execute the docker-compose command https://docs.docker.com/engine/install/. Docker Engine is the runtime environment for containers.
+
+2. **Webhook :** Webhook is required in order to run updates automatically. To set it up go to [webhook setup instructions](https://github.com/wmo-raf/nmhs-cms-init#set-up-webhook).
 
 ---
 ## CMS Installation Instructions
