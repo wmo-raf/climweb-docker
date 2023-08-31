@@ -40,6 +40,18 @@ ENV ASSET_PREFIX $ASSET_PREFIX
 ARG CMS_API
 ENV CMS_API $CMS_API
 
+# create .env file
+RUN touch .env
+
+# add args to .env file
+RUN echo "ANALYTICS_PROPERTY_ID=$ANALYTICS_PROPERTY_ID" >> .env
+RUN echo "BITLY_TOKEN=$BITLY_TOKEN" >> .env
+RUN echo "GOOGLE_CUSTOM_SEARCH_CX=$GOOGLE_CUSTOM_SEARCH_CX" >> .env
+RUN echo "GOOGLE_SEARCH_API_KEY=$GOOGLE_SEARCH_API_KEY" >> .env
+RUN echo "BASE_PATH=$BASE_PATH" >> .env
+RUN echo "ASSET_PREFIX=$ASSET_PREFIX" >> .env
+RUN echo "CMS_API=$CMS_API" >> .env
+
 # Install packages
 RUN yarn install
 
