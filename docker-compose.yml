@@ -59,6 +59,7 @@ services:
       - RECAPTCHA_PRIVATE_KEY=${RECAPTCHA_PRIVATE_KEY}
       - NEXTJS_SERVER_URL=http://cms_mapviewer:3000
       - CMS_UPGRADE_HOOK_URL=${CMS_UPGRADE_HOOK_URL}
+      - WAGTAILADMIN_BASE_URL=${CMS_BASE_URL}
     depends_on:
       - cms_db
     ports:
