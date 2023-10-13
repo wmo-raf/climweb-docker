@@ -60,6 +60,8 @@ services:
       - NEXTJS_SERVER_URL=http://cms_mapviewer:3000
       - CMS_UPGRADE_HOOK_URL=${CMS_UPGRADE_HOOK_URL}
       - WAGTAILADMIN_BASE_URL=${CMS_BASE_URL}
+      - LANGUAGE_CODE=${CMS_DEFAULT_LANGUAGE_CODE}
+      - CMS_BROKER_URI=mqtt://${CMS_BROKER_USERNAME}:${CMS_BROKER_PASSWORD}@cms_mosquitto:1883
     depends_on:
       - cms_db
     ports:
@@ -102,3 +104,15 @@ services:
       - ${CMS_PORT}:80
     depends_on:
       - cms_web
+  cms_mosquitto:
+    container_name: cms_mosquitto
+    restart: always
+    build:
+      context: ./broker
+    environment:
+      - CMS_BROKER_USERNAME=${CMS_BROKER_USERNAME}
+      - CMS_BROKER_PASSWORD=${CMS_BROKER_PASSWORD}
+      - CMS_BROKER_QUEUE_MAX=${CMS_BROKER_QUEUE_MAX}
+    ports:
+      - 1883:1883
+      - 8884:8884
