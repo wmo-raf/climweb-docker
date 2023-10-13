@@ -94,6 +94,7 @@ as `docker-compose.yml` file
 | CMS_DEBUG                | A boolean that turns on/off debug mode. Never deploy a site into production with DEBUG turned on                                                                                                                                                     | NO       | False   |                                                                                                       |
 | CMS_PORT                 | Port to run cms                                                                                                                                                                                                                                      | YES      | 80      |                                                                                                       |
 | CMS_BASE_URL             | This is the base URL used by the Wagtail admin site. It is typically used for generating URLs to include in notification emails. | NO  |  |   |
+| CMS_DEFAULT_LANGUAGE_CODE| The language code for the CMS. Availabe codes are `en` for English, `fr` from French, `ar` for Arabic, `am` for Amharic, `es` for Spanish, `sw` for Swahili. Default is `en` if not set| NO|en
 | CSRF_TRUSTED_ORIGINS     | This variable can be set when CMS_PORT is not 80 e.g if CMS_PORT=8000, CSRF_TRUSTED_ORIGINS would be the following: http://{YOUR_IP_ADDRESS}:8000, http://{YOUR_IP_ADDRESS}, http://localhost:8000 and http://127.0.0.1:8000                                                   | NO       |         |                                                                                                       |
 | TIME_ZONE                | A string representing the time zone for this installation. See the [list of time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Set this to your country timezone                                                             | NO       | UTC     | [List of tz database time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)        |
 | SECRET_KEY               | A secret key for a particular Django installation. This is used to provide cryptographic signing, and should be set to a unique, unpredictable value. Django will refuse to start if SECRET_KEY is not set                                           | YES      |         | You can use this online tool [https://djecrety.ir](https://djecrety.ir/) to generate the key and paste                                                                                                    |
@@ -112,6 +113,14 @@ as `docker-compose.yml` file
 | CMS_MEDIA_VOLUME         | Mounted docker volume path for persisting CMS media files     | YES      |         |                                                                                                       |
 | CMS_UPGRADE_HOOK_URL     | [Webhook](https://github.com/adnanh/webhook) url to your server that triggers a cms upgrade script      | NO      |         |                                                                                                       |
 | BACKUP_VOLUME     | Mounted docker volume path for persisting Backup dp and media files      | YES      |         |                                                                                                       |
+
+## MQTT Broker Variables
+| Variable                     | Description | Required | Default                                                                                                                                                                          |
+|------------------------------|-------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| CMS_BROKER_USERNAME | Username for MQTT broker| YES| 
+| CMS_BROKER_PASSWORD | Password for MQTT broker| YES|
+| CMS_BROKER_QUEUE_MAX| The maximum number of QoS 1 or 2 messages to hold in the queue (per client) above those messages that are currently in flight. See for details here [https://mosquitto.org/man/mosquitto-conf-5.html](https://mosquitto.org/man/mosquitto-conf-5.html) | YES | 1000
+
 
 ## MapViewer Variables
 
