@@ -21,8 +21,8 @@
 
 FROM eclipse-mosquitto:2.0.15
 
-RUN mkdir -p /data/cap/mosquitto
-RUN ln -s /mosquitto /data/cap/mosquitto
+RUN mkdir -p /data/mqtt/mosquitto
+RUN ln -s /mosquitto /data/mqtt/mosquitto
 
 COPY mosquitto-ssl.conf /mosquitto/config/mosquitto-ssl.conf
 COPY mosquitto.conf /mosquitto/config/mosquitto.conf
