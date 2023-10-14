@@ -2,13 +2,11 @@
 
 Content Management System for NMHSs in Africa
 
----
 
 ## User Guide
 
 Read more from the user guide - [nmhs-cms.readthedocs.io](https://nmhs-cms.readthedocs.io/)
 
----
 
 ## Prerequisites
 
@@ -16,129 +14,37 @@ Before installing the CMS, consider installing on your server:
 
 1. **Docker Engine & Docker Compose Plugin :** Ensure that Docker Engine is installed and running on the machine where you plan to execute the docker-compose command https://docs.docker.com/engine/install/. Docker Engine is the runtime environment for containers.
 
-2. **Webhook :** Webhook is required in order to run updates automatically. To set it up go to [webhook setup instructions](https://github.com/wmo-raf/nmhs-cms-init#set-up-webhook).
-
----
 ## CMS Installation Instructions
 
-1. Download from source:
+### 1. Download from source:
 
-    ```sh
-   git clone https://github.com/wmo-raf/nmhs-cms-init.git
-    ```
+```sh
+git clone https://github.com/wmo-raf/nmhs-cms-init.git
+```
 
-    ```sh
-   cd nmhs-cms-init
-    ```
-
-3. Setup environmental variables
-
-    Prepare a '.env' file with necessary variables from '.env.sample'
-
-    ```sh
-   cp .env.sample .env
-    ```
-
-   ```sh
-   nano .env
-   ```
-
-    Edit and replace variables approriately. See [environmental variables section](#environmental-variables) below
-
-2. Build and launch a running instance of the CMS.
-
-    ```sh
-    docker compose build
-    ```
-   
-    ```sh
-    docker compose up -d
-    ```
-
-    The instance can be found at `http://localhost:{CMS_PORT}`
-
-4. Additionally, create superuser to access the CMS Admin interface:
-
-    Log in to container interactive command line interface
-    
-    ```sh
-   docker exec -it cms_web /bin/bash
-    ```
-
-    Create superuser providing username, email and strong password
-
-    ```sh
-   python manage.py createsuperuser
-    ```
-   
-    The admin instance can be found at `http://localhost:{CMS_PORT}/{CMS_ADMIN_URL_PATH}`
+```sh
+cd nmhs-cms-init
+```
 
 ---
 
-# Environmental Variables
-Environmental variables for docker compose. All Should be placed in a single `.env` file, saved in the same folder
-as `docker-compose.yml` file
+### 2. Setup environmental variables
 
+Prepare a '.env' file with necessary variables from '.env.sample'
 
-## CMS Web Variables
+```sh
+cp .env.sample .env
+```
 
+```sh
+nano .env
+```
 
-| Variable    | Description       | Required | Default | More Details |
-|:------------|-------------------|:---------|:--------|:-------------|
-| CMS_DB_USER | CMS Database user | YES      |         |              |
-| CMS_DB_NAME | CMS Database name | YES      |         |              |
-| CMS_DB_PASSWORD          | CMS Database password.                                                                                                                                                                                                                                | YES      |         |
-| CMS_DB_VOLUME            | Mounted docker volume path for persisting database data                                                                                                                                                                                              | YES      |         |                                                                                                       |
-| CMS_SITE_NAME            | The human-readable name of your Wagtail installation which welcomes users upon login to the Wagtail admin.                                                                                                                                           | YES      |         |                                                                                                       |
-| CMS_ADMIN_URL_PATH       | Base Path to admin pages. Do not use `admin` or an easy to guess path. Should be one word and can include an hyphen. DO NOT include any slashes at the start or the end.                                                                                                                                                                           | YES      |         |                                                                                                       |
-| CMS_DEBUG                | A boolean that turns on/off debug mode. Never deploy a site into production with DEBUG turned on                                                                                                                                                     | NO       | False   |                                                                                                       |
-| CMS_PORT                 | Port to run cms                                                                                                                                                                                                                                      | YES      | 80      |                                                                                                       |
-| CMS_BASE_URL             | This is the base URL used by the Wagtail admin site. It is typically used for generating URLs to include in notification emails. | NO  |  |   |
-| CMS_DEFAULT_LANGUAGE_CODE| The language code for the CMS. Availabe codes are `en` for English, `fr` from French, `ar` for Arabic, `am` for Amharic, `es` for Spanish, `sw` for Swahili. Default is `en` if not set| NO|en
-| CSRF_TRUSTED_ORIGINS     | This variable can be set when CMS_PORT is not 80 e.g if CMS_PORT=8000, CSRF_TRUSTED_ORIGINS would be the following: http://{YOUR_IP_ADDRESS}:8000, http://{YOUR_IP_ADDRESS}, http://localhost:8000 and http://127.0.0.1:8000                                                   | NO       |         |                                                                                                       |
-| TIME_ZONE                | A string representing the time zone for this installation. See the [list of time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Set this to your country timezone                                                             | NO       | UTC     | [List of tz database time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)        |
-| SECRET_KEY               | A secret key for a particular Django installation. This is used to provide cryptographic signing, and should be set to a unique, unpredictable value. Django will refuse to start if SECRET_KEY is not set                                           | YES      |         | You can use this online tool [https://djecrety.ir](https://djecrety.ir/) to generate the key and paste                                                                                                    |
-| ALLOWED_HOSTS            | A list of strings representing the host/domain names that this Django site can serve. This is a security measure to prevent HTTP Host header attacks, which are possible even under many seemingly-safe web server configurations.                   | YES      |         | [Django Allowed Hosts](https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-ALLOWED_HOSTS) |                                                                                                                                                                                                                          |          |         |                                                                                                       |
-| SMTP_EMAIL_HOST          | The host to use for sending email                                                                                                                                                                                                                    | NO       |         |                                                                                                       |
-| SMTP_EMAIL_PORT          | Port to use for the SMTP server defined in `SMTP_EMAIL_HOST`                                                                                                                                                                                         | NO       | 25      |                                                                                                       |
-| SMTP_EMAIL_USE_TLS       | Whether to use a TLS (secure) connection when talking to the SMTP server. This is used for explicit TLS connections, generally on port 587                                                                                                           | NO       | True    |                                                                                                       |
-| SMTP_EMAIL_HOST_USER     | Username to use for the SMTP server defined in `SMTP_EMAIL_HOST`. If empty, Django won’t attempt authentication.                                                                                                                                     | NO       |         |                                                                                                       |
-| SMTP_EMAIL_HOST_PASSWORD | Password to use for the SMTP server defined in `SMTP_EMAIL_HOST`. This setting is used in conjunction with `SMTP_EMAIL_HOST_USER` when authenticating to the SMTP server. If either of these settings is empty, Django won’t attempt authentication. | NO       |         |                                                                                                       |
-| CMS_ADMINS               | A list of all the people who get code error notifications, in format `"Name <name@example.com>, Another Name <another@example.com>"`                                                                                                                 | NO       |         |                                                                                                       |
-| DEFAULT_FROM_EMAIL       | Default email address to use for various automated correspondence from the site manager(s)                                                                                                                                                           | NO       |         |                                                                                                       |
-| RECAPTCHA_PUBLIC_KEY     | Google Recaptcha Public Key                                                                                                                                                                                                                          | NO       |         |                                                                                                       |
-| RECAPTCHA_PRIVATE_KEY    | Google Recaptcha Private Key                                                                                                                                                                                                                         | NO       |         |                                                                                                       |
-| CMS_NUM_OF_WORKERS       | Gunicorn number of workers. Recommended value should be `(2 x $num_cores) + 1 `. For example, if your server has `4 CPU Cores`, this value should be set to `9`, which is the result of `(2 x 4) + 1 = 9`                                            | YES      |         | [Gunicorn Workers details](https://docs.gunicorn.org/en/latest/design.html#how-many-workers)          |
-| CMS_STATIC_VOLUME        | Mounted docker volume path for persisting CMS static files                                                                                                                                                                                           | YES      |         |                                                                                                       |
-| CMS_MEDIA_VOLUME         | Mounted docker volume path for persisting CMS media files     | YES      |         |                                                                                                       |
-| CMS_UPGRADE_HOOK_URL     | [Webhook](https://github.com/adnanh/webhook) url to your server that triggers a cms upgrade script      | NO      |         |                                                                                                       |
-| BACKUP_VOLUME     | Mounted docker volume path for persisting Backup dp and media files      | YES      |         |                                                                                                       |
+Edit and replace variables approriately. See [environmental variables section](#environmental-variables) below
 
-## MQTT Broker Variables
-| Variable                     | Description | Required | Default                                                                                                                                                                          |
-|------------------------------|-------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| CMS_BROKER_USERNAME | Username for MQTT broker| YES| 
-| CMS_BROKER_PASSWORD | Password for MQTT broker| YES|
-| CMS_BROKER_QUEUE_MAX| The maximum number of QoS 1 or 2 messages to hold in the queue (per client) above those messages that are currently in flight. See for details here [https://mosquitto.org/man/mosquitto-conf-5.html](https://mosquitto.org/man/mosquitto-conf-5.html) | YES | 1000
+---
 
-
-## MapViewer Variables
-
-| Variable                     | Description                                                                                                                                                                          |
-|------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| MAPVIEWER_CMS_API            | CMS API Endpoint for MapViewer. This should be the public path to your CMS root url , followed by `/api`. For example `https://met.example.com/api`                                  |
-| MAPVIEWER_NEXT_STATIC_VOLUME | Mounted docker volume path for MapViewer static files                                                                                                                                |
-| BITLY_TOKEN                  | [Bitly](https://bitly.com/) access token. The MapViewer uses Bitly for url shortening. See [here](https://dev.bitly.com/docs/getting-started/authentication/) on how to generate one |
-| ANALYTICS_PROPERTY_ID        |                                                                                                                                                                                      |
-| GOOGLE_CUSTOM_SEARCH_CX      |                                                                                                                                                                                      |
-| GOOGLE_SEARCH_API_KEY        |      |                                                 
-
-
-
-
-
-
-## Set up Webhook
+### 3. Set up Webhook
 
 [Webhook](https://github.com/adnanh/webhook) helps to automate some tasks that otherwise need to be done manually. For example upgrading the CMS to a newer version.
 
@@ -162,8 +68,9 @@ This will create a new file `webhook/hooks.yaml` with the correct paths in place
 
 We will use this file to run [Webhook](https://github.com/adnanh/webhook)
 
+---
 
-### Running Webhook server with Supervisor
+### 4. Running Webhook server with Supervisor
 
 Install supervisor to keep the webhook server running in the background.
 
@@ -207,8 +114,100 @@ You can now set the  `CMS_UPGRADE_HOOK_URL` env variable to:
 
 Note this a special docker network url accessed only from inside the `cms_web` docker container.
 
+---
 
-## Other useful commands 
+### 5. Build and launch a running instance of the CMS.
+
+```sh
+docker compose build
+```
+
+```sh
+docker compose up -d
+```
+
+The instance can be found at `http://localhost:{CMS_PORT}`
+
+---
+
+### 6. Finally, create superuser to access the CMS Admin interface:
+
+Log in to container interactive command line interface
+
+```sh
+docker exec -it cms_web /bin/bash
+```
+
+Create superuser providing username, email and strong password
+
+```sh
+python manage.py createsuperuser
+```
+
+The admin instance can be found at `http://localhost:{CMS_PORT}/{CMS_ADMIN_URL_PATH}`
+
+---
+
+# Environmental Variables
+Environmental variables for docker compose. All Should be placed in a single `.env` file, saved in the same folder
+as `docker-compose.yml` file
+
+
+## CMS Web Variables
+
+
+| Variable    | Description       | Required | Default | More Details |
+|:------------|-------------------|:---------|:--------|:-------------|
+| CMS_DB_USER | CMS Database user | YES      |         |              |
+| CMS_DB_NAME | CMS Database name | YES      |         |              |
+| CMS_DB_PASSWORD          | CMS Database password.                                                                                                                                                                                                                                | YES      |         |
+| CMS_DB_VOLUME            | Mounted docker volume path for persisting database data                                                                                                                                                                                              | YES      |         |                                                                                                       |
+| CMS_SITE_NAME            | The human-readable name of your Wagtail installation which welcomes users upon login to the Wagtail admin.                                                                                                                                           | YES      |         |                                                                                                       |
+| CMS_ADMIN_URL_PATH       | Base Path to admin pages. Do not use `admin` or an easy to guess path. Should be one word and can include an hyphen. DO NOT include any slashes at the start or the end.                                                                                                                                                                           | YES      |         |                                                                                                       |
+| CMS_DEBUG                | A boolean that turns on/off debug mode. Never deploy a site into production with DEBUG turned on                                                                                                                                                     | NO       | False   |                                                                                                       |
+| CMS_PORT                 | Port to run cms                                                                                                                                                                                                                                      | YES      | 80      |                                                                                                       |
+| CMS_BASE_URL             | This is the base URL used by the Wagtail admin site. It is typically used for generating URLs to include in notification emails. | NO  |  |   |
+| CMS_DEFAULT_LANGUAGE_CODE| The language code for the CMS. Availabe codes are `en` for English, `fr` from French, `ar` for Arabic, `am` for Amharic, `es` for Spanish, `sw` for Swahili. Default is `en` if not set| NO|en
+| CSRF_TRUSTED_ORIGINS     | This variable can be set when CMS_PORT is not 80 e.g if CMS_PORT=8000, CSRF_TRUSTED_ORIGINS would be the following: http://{YOUR_IP_ADDRESS}:8000, http://{YOUR_IP_ADDRESS}, http://localhost:8000 and http://127.0.0.1:8000                                                   | NO       |         |                                                                                                       |
+| TIME_ZONE                | A string representing the time zone for this installation. See the [list of time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Set this to your country timezone                                                             | NO       | UTC     | [List of tz database time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)        |
+| SECRET_KEY               | A secret key for a particular Django installation. This is used to provide cryptographic signing, and should be set to a unique, unpredictable value. Django will refuse to start if SECRET_KEY is not set                                           | YES      |         | You can use this online tool [https://djecrety.ir](https://djecrety.ir/) to generate the key and paste                                                                                                    |
+| ALLOWED_HOSTS            | A list of strings representing the host/domain names that this Django site can serve. This is a security measure to prevent HTTP Host header attacks, which are possible even under many seemingly-safe web server configurations.                   | YES      |         | [Django Allowed Hosts](https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-ALLOWED_HOSTS) |                                                                                                                                                                                                                          |          |         |                                                                                                       |
+| SMTP_EMAIL_HOST          | The host to use for sending email                                                                                                                                                                                                                    | NO       |         |                                                                                                       |
+| SMTP_EMAIL_PORT          | Port to use for the SMTP server defined in `SMTP_EMAIL_HOST`                                                                                                                                                                                         | NO       | 25      |                                                                                                       |
+| SMTP_EMAIL_USE_TLS       | Whether to use a TLS (secure) connection when talking to the SMTP server. This is used for explicit TLS connections, generally on port 587                                                                                                           | NO       | True    |                                                                                                       |
+| SMTP_EMAIL_HOST_USER     | Username to use for the SMTP server defined in `SMTP_EMAIL_HOST`. If empty, Django won’t attempt authentication.                                                                                                                                     | NO       |         |                                                                                                       |
+| SMTP_EMAIL_HOST_PASSWORD | Password to use for the SMTP server defined in `SMTP_EMAIL_HOST`. This setting is used in conjunction with `SMTP_EMAIL_HOST_USER` when authenticating to the SMTP server. If either of these settings is empty, Django won’t attempt authentication. | NO       |         |                                                                                                       |
+| CMS_ADMINS               | A list of all the people who get code error notifications, in format `"Name <name@example.com>, Another Name <another@example.com>"`                                                                                                                 | NO       |         |                                                                                                       |
+| DEFAULT_FROM_EMAIL       | Default email address to use for various automated correspondence from the site manager(s)                                                                                                                                                           | NO       |         |                                                                                                       |
+| RECAPTCHA_PUBLIC_KEY     | Google Recaptcha Public Key. https://www.google.com/recaptcha/about/ will need a Google account for RECAPTCHA_PRIVATE_KEY and RECAPTCHA_PUBLIC_KEY creation                                                   | NO       |         |                                                                                                       |
+| RECAPTCHA_PRIVATE_KEY    | Google Recaptcha Private Key                                                                                                                                                                                                                         | NO       |         |                                                                                                       |
+| CMS_NUM_OF_WORKERS       | Gunicorn number of workers. Recommended value should be `(2 x $num_cores) + 1 `. For example, if your server has `4 CPU Cores`, this value should be set to `9`, which is the result of `(2 x 4) + 1 = 9`                                            | YES      |         | [Gunicorn Workers details](https://docs.gunicorn.org/en/latest/design.html#how-many-workers)          |
+| CMS_STATIC_VOLUME        | Mounted docker volume path for persisting CMS static files          | YES      | ./cms/static        |                                                                                                       |
+| CMS_MEDIA_VOLUME         | Mounted docker volume path for persisting CMS media files     | YES      | ./cms/media       |                                                                                                       |
+| CMS_UPGRADE_HOOK_URL     | [Webhook](https://github.com/adnanh/webhook) url to your server that triggers a cms upgrade script      | NO      |         |                                                                                                       |
+| BACKUP_VOLUME     | Mounted docker volume path for persisting Backup dp and media files      | YES      | ./cms/backup   |                                                                                                       |
+
+## MQTT Broker Variables
+| Variable                     | Description | Required | Default                                                                                                                                                                          |
+|------------------------------|-------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| CMS_BROKER_USERNAME | Username for MQTT broker| YES| cms |
+| CMS_BROKER_PASSWORD | Password for MQTT broker| YES|     |
+| CMS_BROKER_QUEUE_MAX| The maximum number of QoS 1 or 2 messages to hold in the queue (per client) above those messages that are currently in flight. See for details here [https://mosquitto.org/man/mosquitto-conf-5.html](https://mosquitto.org/man/mosquitto-conf-5.html) | YES | 1000 |
+
+
+## MapViewer Variables
+
+| Variable                     | Description                                                                                                                                                                          |
+|------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
+| MAPVIEWER_CMS_API            | CMS API Endpoint for MapViewer. This should be the public path to your CMS root url , followed by `/api`. For example `https://met.example.com/api`                                  |
+| MAPVIEWER_NEXT_STATIC_VOLUME | Mounted docker volume path for MapViewer static files                                                                                                                                |
+| BITLY_TOKEN                  | [Bitly](https://bitly.com/) access token. The MapViewer uses Bitly for url shortening. See [here](https://dev.bitly.com/docs/getting-started/authentication/) on how to generate one |
+| ANALYTICS_PROPERTY_ID        |                                                                                                                                                                                      |
+| GOOGLE_CUSTOM_SEARCH_CX      |                                                                                                                                                                                      |
+| GOOGLE_SEARCH_API_KEY        |      |                                                 
+
+
+# Other useful commands 
 
 | Purpose           | Command |  Instructions        |                                                                                                                                                                                                      
 |-------------------|-----------|-----------------------------------------------------------------------------|
