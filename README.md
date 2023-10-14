@@ -118,6 +118,12 @@ Note this a special docker network url accessed only from inside the `cms_web` d
 
 ### 5. Build and launch a running instance of the CMS.
 
+Navigate back to nmhs-cms-init project directory using commmand
+
+```sh
+cd path_to/nmhs-cms-init
+```
+
 ```sh
 docker compose build
 ```
