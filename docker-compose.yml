@@ -62,6 +62,7 @@ services:
       - WAGTAILADMIN_BASE_URL=${CMS_BASE_URL}
       - LANGUAGE_CODE=${CMS_DEFAULT_LANGUAGE_CODE}
       - CMS_BROKER_URI=mqtt://${CMS_BROKER_USERNAME}:${CMS_BROKER_PASSWORD}@cms_mosquitto:1883
+      - GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR=/geomanager/data/
     depends_on:
       - cms_db
     ports:
@@ -70,6 +71,7 @@ services:
       - ${CMS_STATIC_VOLUME}:/home/app/web/static
       - ${CMS_MEDIA_VOLUME}:/home/app/web/media
       - ${BACKUP_VOLUME}:/home/app/web/backup
+      - ${GEOMANAGER_AUTO_INGEST_DATA_VOLUME}:/geomanager/data
     extra_hosts:
       - "host.docker.internal:host-gateway"
   cms_mapviewer:

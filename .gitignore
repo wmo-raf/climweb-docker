@@ -4,6 +4,7 @@ cms/error.log
 cms/cache/
 cms/db-data/
 cms/backup/
+cms/geomanager-data/
 
 mautic/mautic_data/
 mautic/mysql_data/
