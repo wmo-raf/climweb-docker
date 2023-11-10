@@ -43,6 +43,8 @@ WORKDIR $APP_HOME/web
 # install requirements
 RUN pip install --upgrade pip && pip install -r requirements.txt
 
+ENV GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR=/geomanager/data
+RUN mkdir -p $GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR
 
 COPY entrypoint.sh ./
 RUN chmod +x entrypoint.sh
