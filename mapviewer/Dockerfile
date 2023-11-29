@@ -1,3 +1,5 @@
+# syntax = docker/dockerfile:1.5
+
 # Stage 1: Build
 FROM node:16.16.0-bullseye-slim AS builder
 
@@ -53,7 +55,7 @@ RUN echo "ASSET_PREFIX=$ASSET_PREFIX" >> .env
 RUN echo "CMS_API=$CMS_API" >> .env
 
 # Install packages
-RUN yarn install
+RUN --mount=type=cache,target=/root/.yarn YARN_CACHE_FOLDER=/root/.yarn yarn --frozen-lockfile
 
 # Build
 RUN yarn build

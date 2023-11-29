@@ -27,6 +27,9 @@ else
     # build web
     docker compose build cms_web --build-arg CMS_VERSION="$NEW_CMS_VERSION"
 
+    # build mapviewer
+    docker compose build cms_mapviewer
+
     # Check the exit code
     if [ $? -ne 0 ]; then
       # restart cms_web to reset upgrade status

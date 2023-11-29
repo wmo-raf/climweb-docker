@@ -1,3 +1,5 @@
+# syntax = docker/dockerfile:1.5
+
 # use osgeo gdal ubuntu small 3.7 image.
 # pre-installed with GDAL 3.7.0 and Python 3.10.6
 FROM ghcr.io/osgeo/gdal:ubuntu-small-3.7.0
@@ -41,7 +43,7 @@ RUN tar -xzf v$CMS_VERSION.tar.gz -C ./ && mv nmhs-cms-$CMS_VERSION/ $APP_HOME/w
 WORKDIR $APP_HOME/web
 
 # install requirements
-RUN pip install --upgrade pip && pip install -r requirements.txt
+RUN --mount=type=cache,target=/root/.cache pip install --upgrade pip && pip install -r requirements.txt
 
 ENV GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR=/geomanager/data
 RUN mkdir -p $GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR
