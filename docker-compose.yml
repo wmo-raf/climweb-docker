@@ -119,4 +119,3 @@ services:
       - CMS_BROKER_QUEUE_MAX=${CMS_BROKER_QUEUE_MAX}
     ports:
       - 1883:1883
-      - 8884:8884
