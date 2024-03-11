@@ -108,6 +108,7 @@ services:
       - ${LETSENCRYPT_VOLUME:-./nginx/letsencrypt}:/etc/letsencrypt:ro
     ports:
       - ${CMS_PORT}:80
+      - 443:443
     depends_on:
       - cms_web
   cms_mosquitto:
