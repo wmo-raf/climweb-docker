@@ -104,6 +104,8 @@ services:
       - ${CMS_MEDIA_VOLUME}:/wagtail_media
       - ${MAPVIEWER_NEXT_STATIC_VOLUME}:/mapviewer/static
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ${LETSENCRYPT_VOLUME:-./nginx/letsencrypt}:/etc/letsencrypt:ro
     ports:
       - ${CMS_PORT}:80
     depends_on:
