@@ -22,6 +22,9 @@ service cron status
 # submit satellite imagery download task
 python manage.py submit_sat_imagery_download
 
+# initialize geomanager
+python manage.py initialize_geomanager
+
 export GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR=${GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR:-/geomanager/data}
 mkdir -p $GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR
 
