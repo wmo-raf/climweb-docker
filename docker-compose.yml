@@ -4,7 +4,7 @@ services:
   cms_db:
     container_name: cms_db
     image: postgis/postgis:15-master
-    restart: always
+    restart: unless-stopped
     environment: 
       - POSTGRES_USER=${CMS_DB_USER}
       - POSTGRES_DB=${CMS_DB_NAME}
@@ -16,7 +16,7 @@ services:
   cms_memcached:
     image: memcached:1.6.12-alpine
     container_name: cms_memcached
-    restart: always
+    restart: unless-stopped
     ports:
       - "11211"
     entrypoint:
@@ -31,7 +31,7 @@ services:
         dockerfile: Dockerfile
         args:
           - CMS_VERSION=${CMS_VERSION}
-    restart: always
+    restart: unless-stopped
     command: sh -c "/wait && ./entrypoint.sh && gunicorn nmhs_cms.wsgi:application --bind 0.0.0.0:8000 --workers=${CMS_NUM_OF_WORKERS} --timeout=${CMS_GUNICORN_TIMEOUT:-300}" 
     expose:
       - "8000"
@@ -77,7 +77,7 @@ services:
       - "host.docker.internal:host-gateway"
   cms_mapviewer:
     container_name: cms_mapviewer
-    restart: always
+    restart: unless-stopped
     platform: linux/x86_64
     build:
       context: ./mapviewer
@@ -98,7 +98,7 @@ services:
   cms_nginx:
     container_name: cms_nginx
     image: nginx:1.20.2-alpine
-    restart: always
+    restart: unless-stopped
     volumes:
       - ${CMS_STATIC_VOLUME}:/wagtail_static
       - ${CMS_MEDIA_VOLUME}:/wagtail_media
@@ -108,12 +108,12 @@ services:
       - ${LETSENCRYPT_VOLUME:-./nginx/letsencrypt}:/etc/letsencrypt:ro
     ports:
       - ${CMS_PORT}:80
-      # - 443:443
+      - 443:443
     depends_on:
       - cms_web
   cms_mosquitto:
     container_name: cms_mosquitto
-    restart: always
+    restart: unless-stopped
     build:
       context: ./broker
     environment:

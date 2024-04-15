@@ -93,6 +93,7 @@ command=webhook -hooks /path_to_project_dir/webhook/hooks.yaml -verbose
 autostart=true
 autorestart=true
 startretries=3
+startsecs=0
 ```
 
 Save the file.
