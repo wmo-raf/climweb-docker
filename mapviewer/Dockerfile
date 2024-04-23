@@ -10,7 +10,7 @@ RUN apt-get update && apt-get install -y \
     libxi6
 
 WORKDIR /app
-ADD https://github.com/wmo-raf/geomapviewer/archive/refs/heads/main.tar.gz ./
+ADD https://github.com/erick-otenyo/geomapviewer/archive/refs/heads/main.tar.gz ./
 RUN tar -xzf ./main.tar.gz -C ./
 WORKDIR /app/geomapviewer-main
 
