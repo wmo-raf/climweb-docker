@@ -28,10 +28,14 @@ python manage.py initialize_geomanager
 export GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR=${GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR:-/geomanager/data}
 mkdir -p $GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR
 
-watchmedo shell-command --patterns="*.nc;*.tif" --ignore-directories --recursive \
-  --command='python manage.py ingest_geomanager_raster "${watch_event_type}" "${watch_src_path}" --dst "${watch_dest_path}" --overwrite' \
-    $GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR &
-    
+# start command to watch for new files in the geomanager auto-ingest data dir
+while file=$(inotifywait -e create --format "%w%f" -r "$GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR"); do
+  EXT=${file##*.}
+  if [ "$EXT" = "tif" ] || [ "$EXT" = "nc" ]; then
+    python manage.py ingest_geomanager_raster created "$file" --overwrite --clip
+  fi
+done &
+
 # reset cms upgrade status
 python manage.py reset_cms_upgrade_status
 
