@@ -32,6 +32,7 @@ mkdir -p $GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR
 while file=$(inotifywait -e create --format "%w%f" -r "$GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR"); do
   EXT=${file##*.}
   if [ "$EXT" = "tif" ] || [ "$EXT" = "nc" ]; then
+    echo "New Geomanager ingestion file detected: $file"
     python manage.py ingest_geomanager_raster created "$file" --overwrite --clip
   fi
 done &
