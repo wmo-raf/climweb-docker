@@ -14,7 +14,8 @@ RUN apt-get update && apt-get install -y \
     libffi-dev \
     python3-pip --fix-missing \
     lsb-release \
-    inotify-tools
+    inotify-tools \
+    poppler-utils
 
 # for pg_dump 
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
