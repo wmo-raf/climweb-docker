@@ -36,7 +36,7 @@ services:
     expose:
       - "8000"
     environment: 
-      - WAIT_HOSTS=cms_db:5432,cms_memcached:11211
+      - WAIT_HOSTS=cms_db:5432,cms_memcached:11211,cms_mbgl_renderer
       - WAIT_TIMEOUT=120
       - DEBUG=${CMS_DEBUG}
       - CMS_VERSION=${CMS_VERSION}
@@ -63,6 +63,7 @@ services:
       - LANGUAGE_CODE=${CMS_DEFAULT_LANGUAGE_CODE}
       - CMS_BROKER_URI=mqtt://${CMS_BROKER_USERNAME}:${CMS_BROKER_PASSWORD}@cms_mosquitto:1883
       - GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR=/geomanager/data
+      - MBGL_RENDERER_URL=http://cms_mbgl_renderer:80/render
     depends_on:
       - cms_db
     ports:
@@ -122,3 +123,9 @@ services:
       - CMS_BROKER_QUEUE_MAX=${CMS_BROKER_QUEUE_MAX}
     ports:
       - 1883:1883
+  cms_mbgl_renderer:
+    container_name: cms_mbgl_renderer
+    image: consbio/mbgl-renderer:latest    
+    restart: unless-stopped
+    ports:
+      - "80"

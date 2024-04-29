@@ -14,6 +14,7 @@ mapviewer/.next/
 mapviewer/.cache/
 
 hooks.yaml
+.DS_Store
 
 
 .env
