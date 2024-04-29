@@ -52,10 +52,10 @@ RUN mkdir -p $GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR
 COPY entrypoint.sh ./
 RUN chmod +x entrypoint.sh
 
-# add satellite.cron to crontab
-COPY satellite.cron /etc/cron.d/satellite.cron
+# add process_tasks.cron to crontab
+COPY process_tasks.cron /etc/cron.d/process_tasks.cron
 
-RUN chmod 0644 /etc/cron.d/satellite.cron
+RUN chmod 0644 /etc/cron.d/process_tasks.cron
 
 # add backup.cron to crontab
 COPY backup.cron /etc/cron.d/backup.cron
@@ -68,7 +68,7 @@ COPY city_forecast.cron /etc/cron.d/city_forecast.cron
 RUN chmod 0644 /etc/cron.d/city_forecast.cron
 
 # install cron jobs
-RUN cat /etc/cron.d/satellite.cron /etc/cron.d/backup.cron /etc/cron.d/city_forecast.cron | crontab
+RUN cat /etc/cron.d/process_tasks.cron /etc/cron.d/backup.cron /etc/cron.d/city_forecast.cron | crontab
 
 # create tmp dir for handling large django uploads
 RUN mkdir -p tmp
