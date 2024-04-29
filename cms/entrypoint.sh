@@ -17,10 +17,6 @@ python manage.py submit_sat_imagery_download
 # initialize geomanager
 python manage.py initialize_geomanager
 
-# Run Django Background Tasks. A similar CRON job will be initiated in the background after 15 minutes
-# Read more at https://django-background-tasks.readthedocs.io/en/latest/#running-tasks
-python manage.py process_tasks --duration 15 &
-
 export GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR=${GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR:-/geomanager/data}
 mkdir -p $GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR
 
