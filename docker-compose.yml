@@ -36,7 +36,7 @@ services:
     expose:
       - "8000"
     environment: 
-      - WAIT_HOSTS=cms_db:5432,cms_memcached:11211,cms_mbgl_renderer
+      - WAIT_HOSTS=cms_db:5432,cms_memcached:11211,cms_mbgl_renderer:80
       - WAIT_TIMEOUT=120
       - DEBUG=${CMS_DEBUG}
       - CMS_VERSION=${CMS_VERSION}
