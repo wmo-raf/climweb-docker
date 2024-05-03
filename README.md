@@ -28,7 +28,13 @@ cd nmhs-cms-init
 
 ---
 
-### 2. Setup environmental variables
+### 2. Copy Docker Compose Configuration
+
+```sh
+cp docker-compose.yml.sample docker-compose.yml
+```
+
+### 3. Setup environmental variables
 
 Prepare a '.env' file with necessary variables from '.env.sample'
 
@@ -44,7 +50,7 @@ Edit and replace variables approriately. See [environmental variables section](#
 
 ---
 
-### 3. Set up Webhook
+### 4. Set up Webhook
 
 [Webhook](https://github.com/adnanh/webhook) helps to automate some tasks that otherwise need to be done manually. For example upgrading the CMS to a newer version.
 
@@ -70,7 +76,7 @@ We will use this file to run [Webhook](https://github.com/adnanh/webhook)
 
 ---
 
-### 4. Running Webhook server with Supervisor
+### 5. Running Webhook server with Supervisor
 
 Install supervisor to keep the webhook server running in the background.
 
@@ -117,7 +123,7 @@ Note this a special docker network url accessed only from inside the `cms_web` d
 
 ---
 
-### 5. Build and launch a running instance of the CMS.
+### 6. Build and launch a running instance of the CMS.
 
 Navigate back to nmhs-cms-init project directory using commmand
 
@@ -137,7 +143,7 @@ The instance can be found at `http://localhost:{CMS_PORT}`
 
 ---
 
-### 6. Finally, create superuser to access the CMS Admin interface:
+### 7. Finally, create superuser to access the CMS Admin interface:
 
 Log in to container interactive command line interface
 
