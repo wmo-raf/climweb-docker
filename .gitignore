@@ -21,3 +21,4 @@ hooks.yaml
 .env
 docker-compose.yml
 nginx/nginx.conf
+nginx/ssl/ssl.conf
