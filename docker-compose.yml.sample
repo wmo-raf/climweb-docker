@@ -32,12 +32,13 @@ services:
         args:
           - CMS_VERSION=${CMS_VERSION}
     restart: unless-stopped
-    command: sh -c "/wait && ./entrypoint.sh && gunicorn nmhs_cms.wsgi:application --bind 0.0.0.0:8000 --workers=${CMS_NUM_OF_WORKERS} --timeout=${CMS_GUNICORN_TIMEOUT:-300}" 
     expose:
       - "8000"
     environment: 
       - WAIT_HOSTS=cms_db:5432,cms_memcached:11211
       - WAIT_TIMEOUT=120
+      - GUNICORN_NUM_OF_WORKERS=${CMS_NUM_OF_WORKERS:-4}
+      - GUNICORN_TIMEOUT=${CMS_GUNICORN_TIMEOUT:-300}
       - DEBUG=${CMS_DEBUG}
       - CMS_VERSION=${CMS_VERSION}
       - WAGTAIL_SITE_NAME=${CMS_SITE_NAME}
@@ -116,7 +117,7 @@ services:
     container_name: cms_mosquitto
     restart: unless-stopped
     build:
-      context: ./broker
+      context: ./mqtt_broker
     environment:
       - CMS_BROKER_USERNAME=${CMS_BROKER_USERNAME}
       - CMS_BROKER_PASSWORD=${CMS_BROKER_PASSWORD}
@@ -127,5 +128,7 @@ services:
     container_name: cms_mbgl_renderer
     image: consbio/mbgl-renderer:latest    
     restart: unless-stopped
+    volumes:
+      - ./mbgl-renderer/entrypoint.sh:/root/entrypoint.sh
     ports:
       - "80"
