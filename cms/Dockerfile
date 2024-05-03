@@ -76,3 +76,5 @@ RUN mkdir -p tmp
 
 # Port used by this container to serve HTTP.
 EXPOSE 8000
+
+CMD /wait && ./entrypoint.sh

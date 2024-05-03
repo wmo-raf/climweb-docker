@@ -32,4 +32,10 @@ done &
 # reset cms upgrade status
 python manage.py reset_cms_upgrade_status
 
-exec "$@"
+# start background tasks, with 15 minutes duration.
+# Cron Job will triggered after 15 minutes
+# https://django-background-tasks.readthedocs.io/en/latest/#running-tasks
+python manage.py process_tasks --duration 900 &
+
+# run gunicorn
+gunicorn nmhs_cms.wsgi:application --bind 0.0.0.0:8000 --workers=${GUNICORN_NUM_OF_WORKERS:-2} --timeout=${GUNICORN_TIMEOUT:-300}

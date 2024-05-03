@@ -7,6 +7,7 @@ cms/db-data/
 cms/backup/
 cms/geomanager-data/
 
+
 mautic/mautic_data/
 mautic/mysql_data/
 
@@ -18,3 +19,5 @@ hooks.yaml
 
 
 .env
+docker-compose.yml
+nginx/nginx.conf
