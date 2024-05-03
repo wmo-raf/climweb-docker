@@ -129,6 +129,6 @@ services:
     image: consbio/mbgl-renderer:latest    
     restart: unless-stopped
     volumes:
-      - ./mbgl-renderer/entrypoint.sh:/root/entrypoint.sh
+      - ./mbgl_renderer/entrypoint.sh:/root/entrypoint.sh
     ports:
       - "80"
