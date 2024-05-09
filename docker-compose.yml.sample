@@ -67,6 +67,7 @@ services:
       - MBGL_RENDERER_URL=http://cms_mbgl_renderer:80/render
       - CAP_CERT_PATH=${CAP_CERT_PATH:-""}
       - CAP_PRIVATE_KEY_PATH=${CAP_PRIVATE_KEY_PATH:-""}
+      - CAP_SIGNATURE_METHOD=${CAP_SIGNATURE_METHOD:-"ECDSA_SHA256"}
     depends_on:
       - cms_db
     ports:
