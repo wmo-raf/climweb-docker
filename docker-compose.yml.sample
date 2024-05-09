@@ -65,6 +65,8 @@ services:
       - CMS_BROKER_URI=mqtt://${CMS_BROKER_USERNAME}:${CMS_BROKER_PASSWORD}@cms_mosquitto:1883
       - GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR=/geomanager/data
       - MBGL_RENDERER_URL=http://cms_mbgl_renderer:80/render
+      - CAP_CERT_PATH=${CAP_CERT_PATH:-""}
+      - CAP_PRIVATE_KEY_PATH=${CAP_PRIVATE_KEY_PATH:-""}
     depends_on:
       - cms_db
     ports:
@@ -75,6 +77,7 @@ services:
       - ${BACKUP_VOLUME}:/home/app/web/backup
       - ${GEOMANAGER_AUTO_INGEST_DATA_VOLUME}:/geomanager/data
       - ./cms/.cache:/root/.cache
+      - ${LETSENCRYPT_VOLUME:-./nginx/letsencrypt}:/etc/letsencrypt:ro
     extra_hosts:
       - "host.docker.internal:host-gateway"
   cms_mapviewer:
