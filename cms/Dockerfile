@@ -68,8 +68,13 @@ COPY city_forecast.cron /etc/cron.d/city_forecast.cron
 
 RUN chmod 0644 /etc/cron.d/city_forecast.cron
 
+# add backup.cron to crontab
+COPY wdqms.cron /etc/cron.d/wdqms.cron
+
+RUN chmod 0644 /etc/cron.d/wdqms.cron
+
 # install cron jobs
-RUN cat /etc/cron.d/process_tasks.cron /etc/cron.d/backup.cron /etc/cron.d/city_forecast.cron | crontab
+RUN cat /etc/cron.d/process_tasks.cron /etc/cron.d/backup.cron /etc/cron.d/city_forecast.cron /etc/cron.d/wdqms.cron | crontab
 
 # create tmp dir for handling large django uploads
 RUN mkdir -p tmp
