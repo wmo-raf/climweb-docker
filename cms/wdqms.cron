@@ -1,5 +1,5 @@
-0 0 * * * cd /home/app/web && python3 manage.py fetch_transmissions --var pressure > /proc/1/fd/1 2>/proc/1/fd/2
-0 0 * * * cd /home/app/web && python3 manage.py fetch_transmissions --var temperature > /proc/1/fd/1 2>/proc/1/fd/2
-0 0 * * * cd /home/app/web && python3 manage.py fetch_transmissions --var humidity > /proc/1/fd/1 2>/proc/1/fd/2
-0 0 * * * cd /home/app/web && python3 manage.py fetch_transmissions --var meridional_wind > /proc/1/fd/1 2>/proc/1/fd/2
-0 0 * * * cd /home/app/web && python3 manage.py fetch_transmissions --var zonal_wind > /proc/1/fd/1 2>/proc/1/fd/2
+0 0 * * * cd /home/app/web && python3 manage.py fetch_transmissions -var pressure > /proc/1/fd/1 2>/proc/1/fd/2
+0 0 * * * cd /home/app/web && python3 manage.py fetch_transmissions -var temperature > /proc/1/fd/1 2>/proc/1/fd/2
+0 0 * * * cd /home/app/web && python3 manage.py fetch_transmissions -var humidity > /proc/1/fd/1 2>/proc/1/fd/2
+0 0 * * * cd /home/app/web && python3 manage.py fetch_transmissions -var meridional_wind > /proc/1/fd/1 2>/proc/1/fd/2
+0 0 * * * cd /home/app/web && python3 manage.py fetch_transmissions -var zonal_wind > /proc/1/fd/1 2>/proc/1/fd/2
