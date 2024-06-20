@@ -1,5 +1,3 @@
-version: '3'
-
 services:
   cms_db:
     container_name: cms_db
@@ -67,9 +65,9 @@ services:
       - CMS_BROKER_URI=mqtt://${CMS_BROKER_USERNAME}:${CMS_BROKER_PASSWORD}@cms_mosquitto:1883
       - GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR=/geomanager/data
       - MBGL_RENDERER_URL=http://cms_mbgl_renderer:80/render
-      - CAP_CERT_PATH=${CAP_CERT_PATH:-""}
-      - CAP_PRIVATE_KEY_PATH=${CAP_PRIVATE_KEY_PATH:-""}
-      - CAP_SIGNATURE_METHOD=${CAP_SIGNATURE_METHOD:-"ECDSA_SHA256"}
+      - CAP_CERT_PATH=${CAP_CERT_PATH:-}
+      - CAP_PRIVATE_KEY_PATH=${CAP_PRIVATE_KEY_PATH:-}
+      - CAP_SIGNATURE_METHOD=${CAP_SIGNATURE_METHOD:-ECDSA_SHA256}
     depends_on:
       - cms_db
     ports:
