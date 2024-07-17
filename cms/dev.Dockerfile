@@ -39,7 +39,7 @@ ARG CMS_BRANCH
 ENV CMS_BRANCH=$CMS_BRANCH
 
 ADD https://github.com/wmo-raf/nmhs-cms/archive/refs/heads/$CMS_BRANCH.tar.gz ./
-RUN tar -xzf nmhs-cms-$CMS_BRANCH.tar.gz -C ./ && mv nmhs-cms-$CMS_BRANCH/ $APP_HOME/web/ && rm nmhs-cms-$CMS_BRANCH.tar.gz 
+RUN tar -xzf $CMS_BRANCH.tar.gz -C ./ && mv nmhs-cms-$CMS_BRANCH/ $APP_HOME/web/ && rm $CMS_BRANCH.tar.gz 
 
 # setup working dir
 WORKDIR $APP_HOME/web
