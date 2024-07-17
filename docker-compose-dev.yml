@@ -26,9 +26,9 @@ services:
     platform: linux/x86_64
     build: 
         context: ./cms
-        dockerfile: Dockerfile
+        dockerfile: dev.Dockerfile
         args:
-          - CMS_VERSION=${CMS_VERSION}
+          - CMS_BRANCH=${CMS_BRANCH:-main}
     restart: unless-stopped
     expose:
       - "8000"
