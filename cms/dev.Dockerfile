@@ -15,8 +15,7 @@ RUN apt-get update && apt-get install -y \
     python3-pip --fix-missing \
     lsb-release \
     inotify-tools \
-    poppler-utils \
-    git
+    poppler-utils
 
 # for pg_dump 
 RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
@@ -39,13 +38,11 @@ RUN mkdir -p $APP_HOME
 ARG CMS_BRANCH
 ENV CMS_BRANCH=$CMS_BRANCH
 
-RUN git clone https://github.com/wmo-raf/nmhs-cms.git $APP_HOME/web/
+ADD https://github.com/wmo-raf/nmhs-cms/archive/refs/heads/$CMS_BRANCH.tar.gz ./
+RUN tar -xzf nmhs-cms-$CMS_BRANCH.tar.gz -C ./ && mv nmhs-cms-$CMS_BRANCH/ $APP_HOME/web/ && rm nmhs-cms-$CMS_BRANCH.tar.gz 
 
 # setup working dir
 WORKDIR $APP_HOME/web
-
-# checkout branch
-RUN git checkout $CMS_BRANCH
 
 # install requirements
 RUN --mount=type=cache,target=/root/.cache pip install --upgrade pip && pip install -r requirements.txt
