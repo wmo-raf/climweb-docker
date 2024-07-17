@@ -1,0 +1,138 @@
+services:
+  cms_db:
+    container_name: cms_db
+    image: postgis/postgis:15-master
+    restart: unless-stopped
+    environment: 
+      - POSTGRES_USER=${CMS_DB_USER}
+      - POSTGRES_DB=${CMS_DB_NAME}
+      - POSTGRES_PASSWORD=${CMS_DB_PASSWORD}
+    ports: 
+      - "5432"
+    volumes:
+      - ${CMS_DB_VOLUME}:/var/lib/postgresql/data/
+  cms_memcached:
+    image: memcached:1.6.12-alpine
+    container_name: cms_memcached
+    restart: unless-stopped
+    ports:
+      - "11211"
+    entrypoint:
+      - memcached
+      - -m 1024
+      - -I 10m
+  cms_web:
+    container_name: cms_web
+    platform: linux/x86_64
+    build: 
+        context: ./cms
+        dockerfile: dev.Dockerfile
+        args:
+          - CMS_BRANCH=${CMS_BRANCH:-main}
+    restart: unless-stopped
+    expose:
+      - "8000"
+    environment: 
+      - WAIT_HOSTS=cms_db:5432,cms_memcached:11211
+      - WAIT_TIMEOUT=120
+      - GUNICORN_NUM_OF_WORKERS=${CMS_NUM_OF_WORKERS:-4}
+      - GUNICORN_TIMEOUT=${CMS_GUNICORN_TIMEOUT:-300}
+      - DEBUG=${CMS_DEBUG}
+      - CMS_VERSION=${CMS_VERSION}
+      - WAGTAIL_SITE_NAME=${CMS_SITE_NAME}
+      - ADMIN_URL_PATH=${CMS_ADMIN_URL_PATH}
+      - TIME_ZONE=${TIME_ZONE}
+      - SECRET_KEY=${SECRET_KEY}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS}
+      - CSRF_TRUSTED_ORIGINS=${CSRF_TRUSTED_ORIGINS}
+      - DATABASE_URL=postgis://${CMS_DB_USER}:${CMS_DB_PASSWORD}@cms_db:5432/${CMS_DB_NAME}
+      - MEMCACHED_URI=cms_memcached:11211
+      - EMAIL_HOST=${SMTP_EMAIL_HOST}
+      - EMAIL_PORT=${SMTP_EMAIL_PORT}
+      - EMAIL_USE_TLS=${SMTP_EMAIL_USE_TLS}
+      - EMAIL_HOST_USER=${SMTP_EMAIL_HOST_USER}
+      - EMAIL_HOST_PASSWORD=${SMTP_EMAIL_HOST_PASSWORD}
+      - DJANGO_ADMINS=${CMS_ADMINS}
+      - DEFAULT_FROM_EMAIL=${DEFAULT_FROM_EMAIL}
+      - RECAPTCHA_PUBLIC_KEY=${RECAPTCHA_PUBLIC_KEY}
+      - RECAPTCHA_PRIVATE_KEY=${RECAPTCHA_PRIVATE_KEY}
+      - RECAPTCHA_DOMAIN=${RECAPTCHA_DOMAIN:-www.google.com}
+      - RECAPTCHA_VERIFY_REQUEST_TIMEOUT=${RECAPTCHA_VERIFY_REQUEST_TIMEOUT:-60}
+      - NEXTJS_SERVER_URL=http://cms_mapviewer:3000
+      - CMS_UPGRADE_HOOK_URL=${CMS_UPGRADE_HOOK_URL}
+      - WAGTAILADMIN_BASE_URL=${CMS_BASE_URL}
+      - LANGUAGE_CODE=${CMS_DEFAULT_LANGUAGE_CODE}
+      - CMS_BROKER_URI=mqtt://${CMS_BROKER_USERNAME}:${CMS_BROKER_PASSWORD}@cms_mosquitto:1883
+      - GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR=/geomanager/data
+      - MBGL_RENDERER_URL=http://cms_mbgl_renderer:80/render
+      - CAP_CERT_PATH=${CAP_CERT_PATH:-}
+      - CAP_PRIVATE_KEY_PATH=${CAP_PRIVATE_KEY_PATH:-}
+      - CAP_SIGNATURE_METHOD=${CAP_SIGNATURE_METHOD:-ECDSA_SHA256}
+    depends_on:
+      - cms_db
+    ports:
+      - "8000"
+    volumes:
+      - ${CMS_STATIC_VOLUME}:/home/app/web/static
+      - ${CMS_MEDIA_VOLUME}:/home/app/web/media
+      - ${BACKUP_VOLUME}:/home/app/web/backup
+      - ${GEOMANAGER_AUTO_INGEST_DATA_VOLUME}:/geomanager/data
+      - ./cms/.cache:/root/.cache
+      - ${LETSENCRYPT_VOLUME:-./nginx/letsencrypt}:/etc/letsencrypt:ro
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
+  cms_mapviewer:
+    container_name: cms_mapviewer
+    restart: unless-stopped
+    platform: linux/x86_64
+    build:
+      context: ./mapviewer
+      args:
+        - CMS_API=${MAPVIEWER_CMS_API}
+        - BASE_PATH=${MAPVIEWER_BASE_PATH}
+        - ASSET_PREFIX=${MAPVIEWER_ASSET_PREFIX}
+        - ANALYTICS_PROPERTY_ID=${ANALYTICS_PROPERTY_ID}
+        - BITLY_TOKEN=${BITLY_TOKEN}
+        - GOOGLE_CUSTOM_SEARCH_CX=${GOOGLE_CUSTOM_SEARCH_CX}
+        - GOOGLE_SEARCH_API_KEY=${GOOGLE_SEARCH_API_KEY}
+        - NEXT_TELEMETRY_DISABLED=1
+    volumes:
+      - ${MAPVIEWER_NEXT_STATIC_VOLUME}:/app/nginx/.next/static
+      - ./mapviewer/.cache:/root/.cache
+    ports:
+      - "3000"
+  cms_nginx:
+    container_name: cms_nginx
+    image: nginx:1.20.2-alpine
+    restart: unless-stopped
+    volumes:
+      - ${CMS_STATIC_VOLUME}:/wagtail_static
+      - ${CMS_MEDIA_VOLUME}:/wagtail_media
+      - ${MAPVIEWER_NEXT_STATIC_VOLUME}:/mapviewer/static
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
+      - ${LETSENCRYPT_VOLUME:-./nginx/letsencrypt}:/etc/letsencrypt:ro
+    ports:
+      - ${CMS_PORT}:80
+      - 443:443
+    depends_on:
+      - cms_web
+  cms_mosquitto:
+    container_name: cms_mosquitto
+    restart: unless-stopped
+    build:
+      context: ./mqtt_broker
+    environment:
+      - CMS_BROKER_USERNAME=${CMS_BROKER_USERNAME}
+      - CMS_BROKER_PASSWORD=${CMS_BROKER_PASSWORD}
+      - CMS_BROKER_QUEUE_MAX=${CMS_BROKER_QUEUE_MAX}
+    ports:
+      - 1883:1883
+  cms_mbgl_renderer:
+    container_name: cms_mbgl_renderer
+    image: consbio/mbgl-renderer:latest    
+    restart: unless-stopped
+    volumes:
+      - ./mbgl_renderer/entrypoint.sh:/root/entrypoint.sh
+    ports:
+      - "80"
