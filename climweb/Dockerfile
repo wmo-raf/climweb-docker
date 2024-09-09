@@ -4,82 +4,118 @@
 # pre-installed with GDAL 3.7.0 and Python 3.10.6
 FROM ghcr.io/osgeo/gdal:ubuntu-small-3.7.0
 
-# install dependencies
-RUN apt-get update && apt-get install -y \
+ARG UID
+ENV UID=${UID:-9999}
+ARG GID
+ENV GID=${GID:-9999}
+
+SHELL ["/bin/bash", "-o", "pipefail", "-c"]
+
+# We might be running as a user which already exists in this image. In that situation
+# Everything is OK and we should just continue on.
+RUN groupadd -g $GID climweb_docker_group || exit 0
+RUN useradd --shell /bin/bash -u $UID -g $GID -o -c "" -m climweb_docker_user -l || exit 0
+ENV DOCKER_USER=climweb_docker_user
+
+ENV POSTGRES_VERSION=15
+
+# Install dependencies
+RUN apt-get update \
+    && apt-get install -y --no-install-recommends \
+    build-essential \
+    lsb-release \
+    ca-certificates \
+    gnupg2 \
+    curl \
     cron \
+    tini \
+    libpq-dev \
     libgeos-dev \
     imagemagick \
     libmagic1 \
     libcairo2-dev \
+    libpangocairo-1.0-0 \
     libffi-dev \
-    python3-pip --fix-missing \
-    lsb-release \
+    python3-pip \
+    python3-dev \
+    python3-venv \
     inotify-tools \
-    poppler-utils
-
-# for pg_dump 
-RUN echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
-    && cat /etc/apt/sources.list.d/pgdg.list \
+    poppler-utils \
+    git \
+    gosu \
+    && echo "deb http://apt.postgresql.org/pub/repos/apt/ $(lsb_release -cs)-pgdg main" > /etc/apt/sources.list.d/pgdg.list \
     && curl --silent https://www.postgresql.org/media/keys/ACCC4CF8.asc | apt-key add - \
     && apt-get update \
-    && apt-get install -y postgresql-client-15
+    && apt-get install --no-install-recommends -y \
+    postgresql-client-$POSTGRES_VERSION \
+    && apt-get autoclean \
+    && apt-get clean \
+    && apt-get autoremove \
+    && rm -rf /var/lib/apt/lists/*
 
-# set python env
-ENV PYTHONDONTWRITEBYTECODE 1
-ENV PYTHONUNBUFFERED 1
+ENV DOCKER_COMPOSE_WAIT_VERSION=2.12.1
 
-# install docker-compose wait
-ADD https://github.com/ufoscout/docker-compose-wait/releases/download/2.12.0/wait /wait
+# Install docker-compose wait
+ADD https://github.com/ufoscout/docker-compose-wait/releases/download/$DOCKER_COMPOSE_WAIT_VERSION/wait /wait
 RUN chmod +x /wait
 
-# Download cms
-ENV APP_HOME=/home/app
-RUN mkdir -p $APP_HOME
-ARG CMS_VERSION
-ENV CMS_VERSION=$CMS_VERSION
+# Create directories and set correct permissions
+RUN mkdir -p /climweb/web /climweb/plugins && chown -R $UID:$GID /climweb
 
-ADD https://github.com/wmo-raf/nmhs-cms/archive/refs/tags/v$CMS_VERSION.tar.gz ./
-RUN tar -xzf v$CMS_VERSION.tar.gz -C ./ && mv nmhs-cms-$CMS_VERSION/ $APP_HOME/web/ && rm v$CMS_VERSION.tar.gz
+ARG CLIMWEB_VERSION
+ENV CLIMWEB_VERSION=$CLIMWEB_VERSION
 
-# setup working dir
-WORKDIR $APP_HOME/web
+# Download climweb source code and extract it to /climweb/web.
+# Also move the plugins scripts to /climweb/plugins.
+RUN curl -L https://github.com/wmo-raf/nmhs-cms/archive/refs/tags/v$CLIMWEB_VERSION.tar.gz \
+    | tar -xz -C /tmp && \
+    mv /tmp/nmhs-cms-$CLIMWEB_VERSION/climweb/* /climweb/web/ && \
+    mv /tmp/nmhs-cms-$CLIMWEB_VERSION/deploy/plugins/*.sh /climweb/plugins/ && \
+    rm -rf /tmp/nmhs-cms-$CLIMWEB_VERSION
 
-# install requirements
-RUN --mount=type=cache,target=/root/.cache pip install --upgrade pip && pip install -r requirements.txt
+# Copy cron files, set permissions, and install cron jobs in one step
+RUN cp -r /climweb/web/docker/*.cron /etc/cron.d/
+RUN chmod 0644 /etc/cron.d/*.cron && \
+    cat /etc/cron.d/*.cron | crontab && \
+    crontab -u $DOCKER_USER /etc/cron.d/*.cron && \
+    chmod u+s /usr/sbin/cron
 
-ENV GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR=/geomanager/data
-RUN mkdir -p $GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR
+# set permission for climweb directory
+RUN chown -R $UID:$GID /climweb
 
-COPY entrypoint.sh ./
-RUN chmod +x entrypoint.sh
+# Set the user and group
+USER $UID:$GID
 
-# add process_tasks.cron to crontab
-COPY process_tasks.cron /etc/cron.d/process_tasks.cron
+# Create a virtual environment
+RUN python3 -m venv /climweb/venv
 
-RUN chmod 0644 /etc/cron.d/process_tasks.cron
+# set the pip cache directory
+ENV PIP_CACHE_DIR=/tmp/climweb_pip_cache
 
-# add backup.cron to crontab
-COPY backup.cron /etc/cron.d/backup.cron
+# Install the requirements
+RUN --mount=type=cache,mode=777,target=$PIP_CACHE_DIR,uid=$UID,gid=$GID . /climweb/venv/bin/activate && \
+     pip3 install  -r /climweb/web/requirements/base.txt
 
-RUN chmod 0644 /etc/cron.d/backup.cron
+# Create a tmp directory for the django to use
+RUN mkdir -p /climweb/tmp && chown -R $UID:$GID /climweb/tmp
 
-# add city_forecast.cron to crontab
-COPY city_forecast.cron /etc/cron.d/city_forecast.cron
+# Set the working directory
+WORKDIR /climweb/web
 
-RUN chmod 0644 /etc/cron.d/city_forecast.cron
+# Ensure that Python outputs everything that's printed inside
+# the application rather than buffering it.
+ENV PYTHONUNBUFFERED 1
 
-# add backup.cron to crontab
-COPY wdqms.cron /etc/cron.d/wdqms.cron
+# Create a directory for raster data to be auto-ingested
+ENV GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR=/climweb/geomanager/data
+RUN mkdir -p $GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR && chown -R $UID:$GID $GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR
 
-RUN chmod 0644 /etc/cron.d/wdqms.cron
+# install climweb as a package
+RUN chmod a+x /climweb/web/docker/docker-entrypoint.sh && \
+    /climweb/venv/bin/pip install --no-cache-dir -e /climweb/web/
 
-# install cron jobs
-RUN cat /etc/cron.d/process_tasks.cron /etc/cron.d/backup.cron /etc/cron.d/city_forecast.cron /etc/cron.d/wdqms.cron | crontab
+ENTRYPOINT ["/usr/bin/tini", "--", "/bin/bash", "/climweb/web/docker/docker-entrypoint.sh"]
 
-# create tmp dir for handling large django uploads
-RUN mkdir -p tmp
+ENV DJANGO_SETTINGS_MODULE='climweb.config.settings.production'
 
-# Port used by this container to serve HTTP.
-EXPOSE 8000
-
-CMD /wait && ./entrypoint.sh
+CMD ["gunicorn"]

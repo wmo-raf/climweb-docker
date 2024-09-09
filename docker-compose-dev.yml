@@ -1,5 +1,5 @@
 x-climweb-variables: &climweb-variables
-  WAIT_HOSTS: climweb_db:5432,climweb_memcached:11211
+  WAIT_HOSTS: climweb_db:5432,redis:6379
   WAIT_TIMEOUT: 120
   GUNICORN_NUM_OF_WORKERS: ${CMS_NUM_OF_WORKERS:-4}
   GUNICORN_TIMEOUT: ${CMS_GUNICORN_TIMEOUT:-300}
@@ -11,7 +11,7 @@ x-climweb-variables: &climweb-variables
   ALLOWED_HOSTS: ${ALLOWED_HOSTS}
   CSRF_TRUSTED_ORIGINS: ${CSRF_TRUSTED_ORIGINS}
   DATABASE_URL: postgis://${CMS_DB_USER}:${CMS_DB_PASSWORD}@climweb_db:5432/${CMS_DB_NAME}
-  MEMCACHED_URI: climweb_memcached:11211
+  REDIS_URL: redis://climweb_redis:6379/0
   EMAIL_HOST: ${SMTP_EMAIL_HOST}
   EMAIL_PORT: ${SMTP_EMAIL_PORT}
   EMAIL_USE_TLS: ${SMTP_EMAIL_USE_TLS}
@@ -47,16 +47,10 @@ services:
     volumes:
       - ${CMS_DB_VOLUME}:/var/lib/postgresql/data/
 
-  climweb_memcached:
-    image: memcached:1.6.12-alpine
-    container_name: climweb_memcached
+  climweb_redis:
+    image: redis:alpine
+    container_name: climweb_redis
     restart: no
-    ports:
-      - "11211"
-    entrypoint:
-      - memcached
-      - -m 1024
-      - -I 10m
 
   climweb:
     image: climweb
@@ -76,6 +70,46 @@ services:
       <<: *climweb-variables
     ports:
       - "8000"
+    volumes:
+      - ${CMS_STATIC_VOLUME}:/climweb/web/src/climweb/static
+      - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media
+      - ${BACKUP_VOLUME}:/climweb/web/src/climweb/backup
+
+  climweb_celery_worker:
+    image: climweb_celery_worker
+    container_name: climweb_celery_worker
+    platform: linux/x86_64
+    build:
+      context: ./climweb
+      dockerfile: dev.Dockerfile
+      args:
+        - UID=${UID}
+        - GID=${GID}
+    init: true
+    command: celery-worker
+    restart: no
+    environment:
+      <<: *climweb-variables
+    volumes:
+      - ${CMS_STATIC_VOLUME}:/climweb/web/src/climweb/static
+      - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media
+      - ${BACKUP_VOLUME}:/climweb/web/src/climweb/backup
+      
+  climweb_celery_beat:
+    image: climweb_celery_beat
+    container_name: climweb_celery_beat
+    platform: linux/x86_64
+    build:
+      context: ./climweb
+      dockerfile: dev.Dockerfile
+      args:
+        - UID=${UID}
+        - GID=${GID}
+    init: true
+    command: celery-beat
+    restart: no
+    environment:
+      <<: *climweb-variables
     volumes:
       - ${CMS_STATIC_VOLUME}:/climweb/web/src/climweb/static
       - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media

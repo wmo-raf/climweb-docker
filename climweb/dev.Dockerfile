@@ -62,16 +62,17 @@ RUN chmod +x /wait
 # Create directories and set correct permissions
 RUN mkdir -p /climweb/web /climweb/plugins && chown -R $UID:$GID /climweb
 
-ARG CLIMWEB_VERSION
-ENV CLIMWEB_VERSION=$CLIMWEB_VERSION
+# Set the climweb branch to use
+ARG CLIMWEB_BRANCH
+ENV CLIMWEB_BRANCH=$CLIMWEB_BRANCH
 
 # Download climweb source code and extract it to /climweb/web.
 # Also move the plugins scripts to /climweb/plugins.
-RUN curl -L https://github.com/wmo-raf/nmhs-cms/archive/refs/tags/v$CLIMWEB_VERSION.tar.gz \
+RUN curl -L https://github.com/wmo-raf/nmhs-cms/archive/refs/heads/$CLIMWEB_BRANCH.tar.gz \
     | tar -xz -C /tmp && \
-    mv /tmp/nmhs-cms-$CLIMWEB_VERSION/climweb/* /climweb/web/ && \
-    mv /tmp/nmhs-cms-$CLIMWEB_VERSION/deploy/plugins/*.sh /climweb/plugins/ && \
-    rm -rf /tmp/nmhs-cms-$CLIMWEB_VERSION
+    mv /tmp/nmhs-cms-$CLIMWEB_BRANCH/climweb/* /climweb/web/ && \
+    mv /tmp/nmhs-cms-$CLIMWEB_BRANCH/deploy/plugins/*.sh /climweb/plugins/ && \
+    rm -rf /tmp/nmhs-cms-$CLIMWEB_BRANCH
 
 # Copy cron files, set permissions, and install cron jobs in one step
 RUN cp -r /climweb/web/docker/*.cron /etc/cron.d/
