@@ -66,7 +66,7 @@ services:
       context: ./climweb
       dockerfile: dev.Dockerfile
       args:
-        - CLIMWEB_BRANCH=${CLIMWEB_BRANCH}
+        - CLIMWEB_VERSION=${CLIMWEB_VERSION}
     restart: no
     expose:
       - 8000
@@ -79,26 +79,26 @@ services:
       - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media
       - ${BACKUP_VOLUME}:/climweb/web/src/climweb/backup
 
-  # climweb_mapviewer:
-  #   image: climweb_mapviewer
-  #   container_name: climweb_mapviewer
-  #   restart: always
-  #   platform: linux/x86_64
-  #   build:
-  #     context: ./mapviewer
-  #     args:
-  #       - CMS_API=${MAPVIEWER_CMS_API}
-  #       - BASE_PATH=${MAPVIEWER_BASE_PATH}
-  #       - ASSET_PREFIX=${MAPVIEWER_ASSET_PREFIX}
-  #       - ANALYTICS_PROPERTY_ID=${ANALYTICS_PROPERTY_ID}
-  #       - BITLY_TOKEN=${BITLY_TOKEN}
-  #       - GOOGLE_CUSTOM_SEARCH_CX=${GOOGLE_CUSTOM_SEARCH_CX}
-  #       - GOOGLE_SEARCH_API_KEY=${GOOGLE_SEARCH_API_KEY}
-  #       - NEXT_TELEMETRY_DISABLED=1
-  #   volumes:
-  #     - ${MAPVIEWER_NEXT_STATIC_VOLUME}:/app/nginx/.next/static
-  #   ports:
-  #     - "3000"
+  climweb_mapviewer:
+    image: climweb_mapviewer
+    container_name: climweb_mapviewer
+    restart: always
+    platform: linux/x86_64
+    build:
+      context: ./mapviewer
+      args:
+        - CMS_API=${MAPVIEWER_CMS_API}
+        - BASE_PATH=${MAPVIEWER_BASE_PATH}
+        - ASSET_PREFIX=${MAPVIEWER_ASSET_PREFIX}
+        - ANALYTICS_PROPERTY_ID=${ANALYTICS_PROPERTY_ID}
+        - BITLY_TOKEN=${BITLY_TOKEN}
+        - GOOGLE_CUSTOM_SEARCH_CX=${GOOGLE_CUSTOM_SEARCH_CX}
+        - GOOGLE_SEARCH_API_KEY=${GOOGLE_SEARCH_API_KEY}
+        - NEXT_TELEMETRY_DISABLED=1
+    volumes:
+      - ${MAPVIEWER_NEXT_STATIC_VOLUME}:/app/nginx/.next/static
+    ports:
+      - "3000"
 
   climweb_nginx:
     container_name: climweb_nginx
