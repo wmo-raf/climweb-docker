@@ -60,7 +60,7 @@ services:
       context: ./climweb
       dockerfile: dev.Dockerfile
       args:
-        - CLIMWEB_VERSION=${CLIMWEB_VERSION}
+        - CLIMWEB_BRANCH=${CLIMWEB_BRANCH}
         - UID=${UID}
         - GID=${GID}
     restart: no
@@ -83,6 +83,7 @@ services:
       context: ./climweb
       dockerfile: dev.Dockerfile
       args:
+        - CLIMWEB_BRANCH=${CLIMWEB_BRANCH}
         - UID=${UID}
         - GID=${GID}
     init: true
@@ -103,6 +104,7 @@ services:
       context: ./climweb
       dockerfile: dev.Dockerfile
       args:
+        - CLIMWEB_BRANCH=${CLIMWEB_BRANCH}
         - UID=${UID}
         - GID=${GID}
     init: true
