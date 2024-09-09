@@ -67,6 +67,8 @@ services:
       dockerfile: dev.Dockerfile
       args:
         - CLIMWEB_VERSION=${CLIMWEB_VERSION}
+        - UID=${UID}
+        - GID=${GID}
     restart: no
     expose:
       - 8000
