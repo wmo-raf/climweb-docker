@@ -1,4 +1,4 @@
-# CMS Installation Guide
+# ClimWeb Installation Guide
 
 Content Management System for NMHSs in Africa
 
@@ -10,20 +10,20 @@ Read more from the user guide - [nmhs-cms.readthedocs.io](https://nmhs-cms.readt
 
 ## Prerequisites
 
-Before installing the CMS, consider installing on your server:
+Before installing ClimWeb, consider installing on your server:
 
 1. **Docker Engine & Docker Compose Plugin :** Ensure that Docker Engine is installed and running on the machine where you plan to execute the docker-compose command https://docs.docker.com/engine/install/. Docker Engine is the runtime environment for containers.
 
-## CMS Installation Instructions
+## ClimWeb Installation Instructions
 
 ### 1. Download from source:
 
 ```sh
-git clone https://github.com/wmo-raf/nmhs-cms-init.git
+git clone https://github.com/wmo-raf/climweb-docker.git climweb
 ```
 
 ```sh
-cd nmhs-cms-init
+cd climweb
 ```
 
 ---
@@ -131,10 +131,10 @@ Note this a special docker network url accessed only from inside the `cms_web` d
 
 ### 7. Build and launch a running instance of the CMS.
 
-Navigate back to nmhs-cms-init project directory using commmand
+Navigate back to climweb project directory using commmand
 
 ```sh
-cd path_to/nmhs-cms-init
+cd path_to/climweb
 ```
 
 ```sh

@@ -1,15 +1,11 @@
-cms/media/
-cms/static/
-cms/error.log
-cms/cache/
-cms/.cache/
-cms/db-data/
-cms/backup/
-cms/geomanager-data/
-
-
-mautic/mautic_data/
-mautic/mysql_data/
+climweb/media/
+climweb/static/
+climweb/error.log
+climweb/cache/
+climweb/.cache/
+climweb/db-data/
+climweb/backup/
+climweb/geomanager-data/
 
 mapviewer/.next/
 mapviewer/.cache/
