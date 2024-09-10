@@ -67,11 +67,11 @@ ENV CLIMWEB_VERSION=$CLIMWEB_VERSION
 
 # Download climweb source code and extract it to /climweb/web.
 # Also move the plugins scripts to /climweb/plugins.
-RUN curl -L https://github.com/wmo-raf/nmhs-cms/archive/refs/tags/v$CLIMWEB_VERSION.tar.gz \
+RUN curl -L https://github.com/wmo-raf/climweb/archive/refs/tags/v$CLIMWEB_VERSION.tar.gz \
     | tar -xz -C /tmp && \
-    mv /tmp/nmhs-cms-$CLIMWEB_VERSION/climweb/* /climweb/web/ && \
-    mv /tmp/nmhs-cms-$CLIMWEB_VERSION/deploy/plugins/*.sh /climweb/plugins/ && \
-    rm -rf /tmp/nmhs-cms-$CLIMWEB_VERSION
+    mv /tmp/climweb-$CLIMWEB_VERSION/climweb/* /climweb/web/ && \
+    mv /tmp/climweb-$CLIMWEB_VERSION/deploy/plugins/*.sh /climweb/plugins/ && \
+    rm -rf /tmp/climweb-$CLIMWEB_VERSION
 
 # Copy cron files, set permissions, and install cron jobs in one step
 RUN cp -r /climweb/web/docker/*.cron /etc/cron.d/

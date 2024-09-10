@@ -68,11 +68,11 @@ ENV CLIMWEB_COMMIT=$CLIMWEB_COMMIT
 
 # Download climweb source code and extract it to /climweb/web.
 # Also move the plugins scripts to /climweb/plugins.
-RUN curl -L https://github.com/wmo-raf/nmhs-cms/archive/$CLIMWEB_COMMIT.tar.gz \
+RUN curl -L https://github.com/wmo-raf/climweb/archive/$CLIMWEB_COMMIT.tar.gz \
     | tar -xz -C /tmp && \
-    mv /tmp/nmhs-cms-$CLIMWEB_COMMIT/climweb/* /climweb/web/ && \
-    mv /tmp/nmhs-cms-$CLIMWEB_COMMIT/deploy/plugins/*.sh /climweb/plugins/ && \
-    rm -rf /tmp/nmhs-cms-$CLIMWEB_COMMIT
+    mv /tmp/climweb-$CLIMWEB_COMMIT/climweb/* /climweb/web/ && \
+    mv /tmp/climweb-$CLIMWEB_COMMIT/deploy/plugins/*.sh /climweb/plugins/ && \
+    rm -rf /tmp/climweb-$CLIMWEB_COMMIT
 
 # Copy cron files, set permissions, and install cron jobs in one step
 RUN cp -r /climweb/web/docker/*.cron /etc/cron.d/
