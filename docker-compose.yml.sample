@@ -1,5 +1,4 @@
 x-climweb-variables: &climweb-variables
-  WAIT_HOSTS: climweb_db:5432,climweb_redis:6379
   WAIT_TIMEOUT: 120
   GUNICORN_NUM_OF_WORKERS: ${CMS_NUM_OF_WORKERS:-4}
   GUNICORN_TIMEOUT: ${CMS_GUNICORN_TIMEOUT:-300}
@@ -72,6 +71,7 @@ services:
       - 8000
     environment:
       <<: *climweb-variables
+      WAIT_HOSTS: climweb_db:5432,climweb_redis:6379
     ports:
       - "8000"
     volumes:
@@ -95,6 +95,7 @@ services:
     restart: no
     environment:
       <<: *climweb-variables
+      WAIT_HOSTS: climweb_db:5432,climweb_redis:6379,climweb:8000
     volumes:
       - ${CMS_STATIC_VOLUME}:/climweb/web/src/climweb/static
       - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media
@@ -116,6 +117,7 @@ services:
     restart: no
     environment:
       <<: *climweb-variables
+      WAIT_HOSTS: climweb_db:5432,climweb_redis:6379,climweb:8000
     volumes:
       - ${CMS_STATIC_VOLUME}:/climweb/web/src/climweb/static
       - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media
