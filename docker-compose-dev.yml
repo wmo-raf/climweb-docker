@@ -1,5 +1,5 @@
 x-climweb-variables: &climweb-variables
-  WAIT_HOSTS: climweb_db:5432,redis:6379
+  WAIT_HOSTS: climweb_db:5432,climweb_redis:6379
   WAIT_TIMEOUT: 120
   GUNICORN_NUM_OF_WORKERS: ${CMS_NUM_OF_WORKERS:-4}
   GUNICORN_TIMEOUT: ${CMS_GUNICORN_TIMEOUT:-300}
