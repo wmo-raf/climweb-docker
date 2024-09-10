@@ -71,7 +71,7 @@ http {
         resolver 127.0.0.11 valid=30s;
 
         location / {
-            set $upstream cms_web:8000;
+            set $upstream climweb:8000;
 
             proxy_pass http://$upstream;
             proxy_redirect off;
@@ -96,7 +96,7 @@ http {
         }
 
         location /_next/ {
-            set $upstream cms_mapviewer:3000;
+            set $upstream climweb_mapviewer:3000;
 
             proxy_pass http://$upstream;
             proxy_redirect off;
@@ -109,7 +109,7 @@ http {
         }
 
         location /mbgl-renderer/ {
-            set $upstream cms_mbgl_renderer:80;
+            set $upstream climweb_mbgl_renderer:80;
             rewrite ^/mbgl-renderer/(.*) /$1 break;
 
             proxy_pass http://$upstream;

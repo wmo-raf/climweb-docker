@@ -1,5 +1,0 @@
-0 0,12 * * * cd /home/app/web && python3 manage.py wdqms_stats -var pressure > /proc/1/fd/1 2>/proc/1/fd/2
-0 0,12 * * * cd /home/app/web && python3 manage.py wdqms_stats -var temperature > /proc/1/fd/1 2>/proc/1/fd/2
-0 0,12 * * * cd /home/app/web && python3 manage.py wdqms_stats -var humidity > /proc/1/fd/1 2>/proc/1/fd/2
-0 0,12 * * * cd /home/app/web && python3 manage.py wdqms_stats -var meridional_wind > /proc/1/fd/1 2>/proc/1/fd/2
-0 0,12 * * * cd /home/app/web && python3 manage.py wdqms_stats -var zonal_wind > /proc/1/fd/1 2>/proc/1/fd/2
