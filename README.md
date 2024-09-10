@@ -154,7 +154,7 @@ The instance can be found at `http://localhost:{CMS_PORT}`
 Log in to container interactive command line interface
 
 ```sh
-docker exec -it cms_web /bin/bash
+docker exec -it climweb /bin/bash
 ```
 
 Create superuser providing username, email and strong password
@@ -201,10 +201,10 @@ as `docker-compose.yml` file
 | RECAPTCHA_PUBLIC_KEY     | Google Recaptcha Public Key. https://www.google.com/recaptcha/about/ will need a Google account for RECAPTCHA_PRIVATE_KEY and RECAPTCHA_PUBLIC_KEY creation                                                   | NO       |         |                                                                                                       |
 | RECAPTCHA_PRIVATE_KEY    | Google Recaptcha Private Key                                                                                                                                                                                                                         | NO       |         |                                                                                                       |
 | CMS_NUM_OF_WORKERS       | Gunicorn number of workers. Recommended value should be `(2 x $num_cores) + 1 `. For example, if your server has `4 CPU Cores`, this value should be set to `9`, which is the result of `(2 x 4) + 1 = 9`                                            | YES      |         | [Gunicorn Workers details](https://docs.gunicorn.org/en/latest/design.html#how-many-workers)          |
-| CMS_STATIC_VOLUME        | Mounted docker volume path for persisting CMS static files          | YES      | ./cms/static        |                                                                                                       |
-| CMS_MEDIA_VOLUME         | Mounted docker volume path for persisting CMS media files     | YES      | ./cms/media       |                                                                                                       |
+| CMS_STATIC_VOLUME        | Mounted docker volume path for persisting CMS static files          | YES      | ./climeb/static        |                                                                                                       |
+| CMS_MEDIA_VOLUME         | Mounted docker volume path for persisting CMS media files     | YES      | ./climeb/media       |                                                                                                       |
 | CMS_UPGRADE_HOOK_URL     | [Webhook](https://github.com/adnanh/webhook) url to your server that triggers a cms upgrade script      | NO      |         |                                                                                                       |
-| BACKUP_VOLUME     | Mounted docker volume path for persisting Backup dp and media files      | YES      | ./cms/backup   |                                                                                                       |
+| BACKUP_VOLUME     | Mounted docker volume path for persisting Backup dp and media files      | YES      | ./climeb/backup   |                                                                                                       |
 
 ## MQTT Broker Variables
 | Variable                     | Description | Required | Default                                                                                                                                                                          |
