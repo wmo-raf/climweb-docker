@@ -165,5 +165,3 @@ services:
       - ./nginx/ssl:/etc/nginx/ssl
     ports:
       - "80:80"
-    depends_on:
-      - climweb
