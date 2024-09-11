@@ -162,6 +162,7 @@ services:
       - ${CMS_MEDIA_VOLUME}:/wagtail_media
       - ${MAPVIEWER_NEXT_STATIC_VOLUME}:/mapviewer/static
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
+      - ./nginx/ssl:/etc/nginx/ssl
     ports:
       - "80:80"
     depends_on:
