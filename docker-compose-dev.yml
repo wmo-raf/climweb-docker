@@ -151,10 +151,10 @@ services:
     ports:
       - "80"
 
-  climweb_nginx:
-    container_name: climweb_nginx
-    image: nginx:1.20.2-alpine
-    restart: always
+  nginx:
+    container_name: nginx
+    image: nginx:1.27.1-alpine
+    restart: unless-stopped
     volumes:
       - ${CMS_STATIC_VOLUME}:/wagtail_static
       - ${CMS_MEDIA_VOLUME}:/wagtail_media
