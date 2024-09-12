@@ -1,45 +1,41 @@
 #!/bin/bash
 set -eu
 
-NEW_CMS_VERSION=$1
+NEW_CLIMWEB_VERSION=$1
 
-if [ -z "$NEW_CMS_VERSION" ]; then
+if [ -z "$NEW_CLIMWEB_VERSION" ]; then
   echo "No Version passed"
   exit 1
 fi
 
 env_file=".env"
 
-CURRENT_CMS_VERSION=$(grep -E "^CMS_VERSION=" "$env_file" | awk -F'=' '{print $2}' | tr -d '"')
+CURRENT_CLIMWEB_VERSION=$(grep -E "^CLIMWEB_VERSION=" "$env_file" | awk -F'=' '{print $2}' | tr -d '"')
 
-if [ -z "$CURRENT_CMS_VERSION" ]; then
-  echo "No CMS Version"
+if [ -z "$CURRENT_CLIMWEB_VERSION" ]; then
+  echo "No CLIMWEB Version"
   exit 1
 else
-  if [ "$NEW_CMS_VERSION" == "$CURRENT_CMS_VERSION" ]; then
-    echo "Current version: '$CURRENT_CMS_VERSION' and provided version: '$NEW_CMS_VERSION' are equal"
+  if [ "$NEW_CLIMWEB_VERSION" == "$CURRENT_CLIMWEB_VERSION" ]; then
+    echo "Current version: '$CURRENT_CLIMWEB_VERSION' and provided version: '$NEW_CLIMWEB_VERSION' are equal"
   else
-    echo "********* Building cms_web with new version $NEW_CMS_VERSION.... *************"
+    echo "********* Building climweb with new version $NEW_CLIMWEB_VERSION.... *************"
 
     # disable exit on error
     set +e
 
-    # build web
-    docker compose build cms_web --build-arg CMS_VERSION="$NEW_CMS_VERSION"
-
-    # build mapviewer
-    docker compose build cms_mapviewer
+    # build containers
+    docker compose build --build-arg CLIMWEB_VERSION="$NEW_CLIMWEB_VERSION"
 
     # Check the exit code
     if [ $? -ne 0 ]; then
-      # restart cms_web to reset upgrade status
-      docker compose restart cms_web
-
+      # restart climweb to reset upgrade status
+      docker compose restart climweb
     else
       echo "********* Updating env file.... *************"
 
-      # replacing CMS_VERSION
-      env_c=$(sed "s/^CMS_VERSION=.*/CMS_VERSION=$NEW_CMS_VERSION/" $env_file)
+      # replacing CLIMWEB_VERSION
+      env_c=$(sed "s/^CLIMWEB_VERSION=.*/CLIMWEB_VERSION=$NEW_CLIMWEB_VERSION/" $env_file)
       # write new env file
       echo "$env_c" >$env_file
 
