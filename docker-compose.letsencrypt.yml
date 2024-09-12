@@ -78,6 +78,7 @@ services:
       - ${CMS_STATIC_VOLUME}:/climweb/web/src/climweb/static
       - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media
       - ${BACKUP_VOLUME}:/climweb/web/src/climweb/backup
+      - ${LETS_ENCRYPT_VOLUME:-./nginx/certbot/conf}:/etc/letsencrypt:ro
 
   climweb_celery_worker:
     image: climweb_celery_worker
@@ -100,6 +101,7 @@ services:
       - ${CMS_STATIC_VOLUME}:/climweb/web/src/climweb/static
       - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media
       - ${BACKUP_VOLUME}:/climweb/web/src/climweb/backup
+      - ${LETS_ENCRYPT_VOLUME:-./nginx/certbot/conf}:/etc/letsencrypt:ro
       
   climweb_celery_beat:
     image: climweb_celery_beat
@@ -122,6 +124,7 @@ services:
       - ${CMS_STATIC_VOLUME}:/climweb/web/src/climweb/static
       - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media
       - ${BACKUP_VOLUME}:/climweb/web/src/climweb/backup
+      - ${LETS_ENCRYPT_VOLUME:-./nginx/certbot/conf}:/etc/letsencrypt:ro
 
   climweb_mapviewer:
     image: climweb_mapviewer
