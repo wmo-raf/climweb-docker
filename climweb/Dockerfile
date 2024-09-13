@@ -34,13 +34,8 @@ RUN apt-get update \
     imagemagick \
     libmagic1 \
     libcairo2-dev \
-    libpango-1.0-0 \
-    libharfbuzz0b \
-    libpangoft2-1.0-0 \
-    libffi-dev \
-    libjpeg-dev \
-    libopenjp2-7-dev \
     libpangocairo-1.0-0 \
+    libffi-dev \
     python3-pip \
     python3-dev \
     python3-venv \
