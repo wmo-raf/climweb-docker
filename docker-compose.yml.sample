@@ -146,10 +146,10 @@ services:
 
   climweb_mbgl_renderer:
     container_name: climweb_mbgl_renderer
-    image: consbio/mbgl-renderer:latest    
+    build:
+      context: ./mbgl_renderer
+      dockerfile: Dockerfile
     restart: unless-stopped
-    volumes:
-      - ./mbgl_renderer/entrypoint.sh:/root/entrypoint.sh
     ports:
       - "80"
 
