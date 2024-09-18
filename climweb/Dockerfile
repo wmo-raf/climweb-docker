@@ -73,13 +73,6 @@ RUN curl -L https://github.com/wmo-raf/climweb/archive/refs/tags/v$CLIMWEB_VERSI
     mv /tmp/climweb-$CLIMWEB_VERSION/deploy/plugins/*.sh /climweb/plugins/ && \
     rm -rf /tmp/climweb-$CLIMWEB_VERSION
 
-# Copy cron files, set permissions, and install cron jobs in one step
-RUN cp -r /climweb/web/docker/*.cron /etc/cron.d/
-RUN chmod 0644 /etc/cron.d/*.cron && \
-    cat /etc/cron.d/*.cron | crontab && \
-    crontab -u $DOCKER_USER /etc/cron.d/*.cron && \
-    chmod u+s /usr/sbin/cron
-
 # set permission for climweb directory
 RUN chown -R $UID:$GID /climweb
 
