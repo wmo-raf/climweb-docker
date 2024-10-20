@@ -74,6 +74,8 @@ services:
       WAIT_HOSTS: climweb_db:5432,climweb_redis:6379
     ports:
       - "8000"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     volumes:
       - ${CMS_STATIC_VOLUME}:/climweb/web/src/climweb/static
       - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media
