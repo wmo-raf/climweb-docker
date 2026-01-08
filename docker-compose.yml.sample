@@ -213,4 +213,4 @@ services:
 # networks:
 #   default:
 #     external: true
-#     name: ${DOCKER_NETWORK_NAME}
+#     name: ${DOCKER_NETWORK_NAME:-climweb}
