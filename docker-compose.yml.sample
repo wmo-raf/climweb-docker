@@ -195,7 +195,7 @@ services:
       - ${MAPVIEWER_NEXT_STATIC_VOLUME}:/mapviewer/static
       - ./nginx/nginx.conf:/etc/nginx/nginx.conf
     ports:
-      - "80"
+      - "80:80"
 
   climweb_otel_collector:
     image: otel/opentelemetry-collector:0.119.0
