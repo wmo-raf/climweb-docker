@@ -130,25 +130,7 @@ Note this a special docker network url accessed only from inside the `cms_web` d
 ---
 
 
-### 7. Setup Observability (Logging + Metrics)
-ClimWeb uses [OpenTelemetry](https://opentelemetry.io/) to collect logs and metrics. The `docker-compose.yml` file includes an [opentelemetry-collector](https://opentelemetry.io/docs/collector/) that provides a vendor-agonistic way to gather observability data.
-
-A default configuration that uses the [Honeycomb](https://www.honeycomb.io/) platform is provided. Honeycomb provides a generous free tier to get you started. 
-
-Custom collectors can be used by setting the collector endpoint env variable `OTEL_EXPORTER_OTLP_ENDPOINT` and commenting out the `climweb_otel_collector` service, or configuring the `climweb_otel_collector` to what suits you.
-
-To use the default setup, create a [free Honeycomb account](https://ui.honeycomb.io/signup) and get your API Key from `Account > Team Settings` menu
-
-
-Update `.env`
-
-```
-CLIMWEB_ENABLE_OTEL=True
-HONEYCOMB_API_KEY=
-```
-
-
-### 8. Build and launch a running instance of the CMS.
+### 7. Build and launch a running instance of the CMS.
 
 Navigate back to climweb project directory using commmand
 
@@ -168,7 +150,7 @@ The instance can be found at `http://localhost:{CMS_PORT}`
 
 ---
 
-### 9. Finally, create superuser to access the CMS Admin interface:
+### 8. Finally, create superuser to access the CMS Admin interface:
 
 Log in to container interactive command line interface
 
@@ -183,6 +165,27 @@ climweb createsuperuser
 ```
 
 The admin instance can be found at `http://localhost:{CMS_PORT}/{CMS_ADMIN_URL_PATH}`
+
+---
+
+
+### Setup Observability (Logging + Metrics) - optional
+
+ClimWeb uses [OpenTelemetry](https://opentelemetry.io/) to collect logs and metrics. The `docker-compose.yml` file includes an [opentelemetry-collector](https://opentelemetry.io/docs/collector/) that provides a vendor-agonistic way to gather observability data.
+
+A default configuration that uses the [Honeycomb](https://www.honeycomb.io/) platform is provided. Honeycomb provides a generous free tier to get you started. 
+
+Custom collectors can be used by setting the collector endpoint env variable `OTEL_EXPORTER_OTLP_ENDPOINT` and commenting out the `climweb_otel_collector` service, or configuring the `climweb_otel_collector` to what suits you.
+
+To use the default setup, create a [free Honeycomb account](https://ui.honeycomb.io/signup) and get your API Key from `Account > Team Settings` menu
+
+
+Update `.env`
+
+```
+CLIMWEB_ENABLE_OTEL=True
+HONEYCOMB_API_KEY=
+```
 
 ---
 
