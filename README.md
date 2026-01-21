@@ -150,6 +150,19 @@ The instance can be found at `http://localhost:{CMS_PORT}`
 
 ---
 
+### 8. Static, Media and backup files persmission
+
+Type the follwoing command and retrieve and replace the UID and GID in the second command
+
+`id`
+
+`sudo chown -R UID:GID climweb/static`
+
+`sudo chown -R UID:GID climweb/media`
+
+`sudo chown -R UID:GID climweb/backup`
+
+
 ### 8. Finally, create superuser to access the CMS Admin interface:
 
 Log in to container interactive command line interface
