@@ -146,6 +146,11 @@ docker compose build
 docker compose up -d
 ```
 
+
+```sh
+docker compose logs -f --tail 100
+```
+
 The instance can be found at `http://localhost:{CMS_PORT}`
 
 ---
