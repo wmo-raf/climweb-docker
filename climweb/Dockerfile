@@ -92,7 +92,6 @@ ENV PIP_CACHE_DIR=/tmp/climweb_pip_cache
 # Install the requirements
 RUN --mount=type=cache,mode=777,target=$PIP_CACHE_DIR,uid=$UID,gid=$GID \
     . /climweb/venv/bin/activate && \
-    pip install --upgrade pip setuptools wheel && \
     pip install -r /climweb/web/requirements/base.txt
      
 # Create a tmp directory for the django to use
@@ -111,7 +110,8 @@ RUN mkdir -p $GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR && chown -R $UID:$GID $GEOM
 
 # install climweb as a package
 RUN chmod a+x /climweb/web/docker/docker-entrypoint.sh && \
-    /climweb/venv/bin/pip install --no-cache-dir -e /climweb/web/
+    /climweb/venv/bin/pip install --no-cache-dir -e /climweb/web/ && \
+    /climweb/venv/bin/pip install --no-cache-dir setuptools
 
 ENTRYPOINT ["/usr/bin/tini", "--", "/bin/bash", "/climweb/web/docker/docker-entrypoint.sh"]
 
