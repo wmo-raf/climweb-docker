@@ -111,6 +111,8 @@ RUN mkdir -p $GEOMANAGER_AUTO_INGEST_RASTER_DATA_DIR && chown -R $UID:$GID $GEOM
 RUN chmod a+x /climweb/web/docker/docker-entrypoint.sh && \
     /climweb/venv/bin/pip install --no-cache-dir -e /climweb/web/
 
+RUN pip3 install setuptools
+
 ENTRYPOINT ["/usr/bin/tini", "--", "/bin/bash", "/climweb/web/docker/docker-entrypoint.sh"]
 
 # Add the venv to the path. This ensures that the venv is always activated when the container starts.
