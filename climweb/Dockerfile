@@ -90,8 +90,10 @@ RUN python3 -m venv /climweb/venv
 ENV PIP_CACHE_DIR=/tmp/climweb_pip_cache
 
 # Install the requirements
-RUN --mount=type=cache,mode=777,target=$PIP_CACHE_DIR,uid=$UID,gid=$GID . /climweb/venv/bin/activate && \
-     pip3 install  -r /climweb/web/requirements/base.txt
+RUN --mount=type=cache,mode=777,target=$PIP_CACHE_DIR,uid=$UID,gid=$GID \
+    . /climweb/venv/bin/activate && \
+    pip install --upgrade pip setuptools wheel && \
+    pip install -r /climweb/web/requirements/base.txt
      
 # Create a tmp directory for the django to use
 RUN mkdir -p /climweb/tmp && chown -R $UID:$GID /climweb/tmp
