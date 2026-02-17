@@ -98,6 +98,7 @@ services:
     build:
       context: ./climweb
       dockerfile: Dockerfile
+      network: host
       args:
         - CLIMWEB_VERSION=${CLIMWEB_VERSION}
         - UID=${UID}
@@ -125,6 +126,7 @@ services:
     platform: linux/x86_64
     build:
       context: ./climweb
+      network: host
       dockerfile: Dockerfile
       args:
         - CLIMWEB_VERSION=${CLIMWEB_VERSION}
@@ -171,6 +173,7 @@ services:
     platform: linux/x86_64
     build:
       context: ./mapviewer
+      network: host
       args:
         - CMS_API=${MAPVIEWER_CMS_API}
         - BASE_PATH=${MAPVIEWER_BASE_PATH}
