@@ -4,6 +4,7 @@
 FROM node:16.16.0-bullseye-slim AS builder
 
 RUN apt-get update && apt-get install -y \
+    ca-certificates \
     zlib1g-dev \
     libpng-dev \
     libgl1 \
