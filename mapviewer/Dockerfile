@@ -1,7 +1,7 @@
 # syntax = docker/dockerfile:1.5
 
 # Stage 1: Build
-FROM node:16.16.0-bullseye-slim AS builder
+FROM node:20-bookworm-slim AS builder
 
 RUN apt-get update && apt-get install -y \
     ca-certificates \
