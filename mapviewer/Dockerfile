@@ -62,7 +62,7 @@ RUN --mount=type=cache,target=/root/.yarn YARN_CACHE_FOLDER=/root/.yarn yarn --f
 RUN yarn build
 
 # Stage 2: run
-FROM node:16.16.0-bullseye-slim
+FROM node:20-bookworm-slim
 WORKDIR /app
 COPY --from=builder /app/geomapviewer-main/.next ./.next
 COPY --from=builder /app/geomapviewer-main/public ./public
