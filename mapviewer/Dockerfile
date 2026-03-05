@@ -1,6 +1,8 @@
-# syntax = docker/dockerfile:1.5
+# syntax=docker/dockerfile:1.5
 
-# Stage 1: Build
+############################
+# Stage 1: Builder
+############################
 FROM node:20-bookworm-slim AS builder
 
 RUN apt-get update && apt-get install -y \
@@ -8,69 +10,46 @@ RUN apt-get update && apt-get install -y \
     zlib1g-dev \
     libpng-dev \
     libgl1 \
-    libxi6
+    libxi6 \
+    && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
-ADD https://github.com/erick-otenyo/geomapviewer/archive/refs/heads/main.tar.gz ./
-RUN tar -xzf ./main.tar.gz -C ./
+
+# Copy source from local directory
+COPY . /app
+
 WORKDIR /app/geomapviewer-main
 
-# Env Variables that should be available at build time
-ARG ANALYTICS_PROPERTY_ID
-ENV ANALYTICS_PROPERTY_ID $ANALYTICS_PROPERTY_ID
+# Install dependencies with caching
+RUN --mount=type=cache,target=/root/.yarn \
+    YARN_CACHE_FOLDER=/root/.yarn \
+    yarn --frozen-lockfile --network-timeout=100000 
 
-ARG BITLY_TOKEN
-ENV BITLY_TOKEN $BITLY_TOKEN
-
-ARG DEBUG
-ENV DEBUG $DEBUG
-
-ARG FEATURE_ENV
-ENV FEATURE_ENV $FEATURE_ENV
-
-ARG GOOGLE_CUSTOM_SEARCH_CX
-ENV GOOGLE_CUSTOM_SEARCH_CX $GOOGLE_CUSTOM_SEARCH_CX
-
-ARG GOOGLE_SEARCH_API_KEY
-ENV GOOGLE_SEARCH_API_KEY $GOOGLE_SEARCH_API_KEY
-
-ARG BASE_PATH
-ENV BASE_PATH $BASE_PATH
-
-ARG ASSET_PREFIX
-ENV ASSET_PREFIX $ASSET_PREFIX
-
-ARG CMS_API
-ENV CMS_API $CMS_API
-
-# create .env file
-RUN touch .env
-
-# add args to .env file
-RUN echo "ANALYTICS_PROPERTY_ID=$ANALYTICS_PROPERTY_ID" >> .env
-RUN echo "BITLY_TOKEN=$BITLY_TOKEN" >> .env
-RUN echo "GOOGLE_CUSTOM_SEARCH_CX=$GOOGLE_CUSTOM_SEARCH_CX" >> .env
-RUN echo "GOOGLE_SEARCH_API_KEY=$GOOGLE_SEARCH_API_KEY" >> .env
-RUN echo "BASE_PATH=$BASE_PATH" >> .env
-RUN echo "ASSET_PREFIX=$ASSET_PREFIX" >> .env
-RUN echo "CMS_API=$CMS_API" >> .env
-
-# Install packages
-RUN --mount=type=cache,target=/root/.yarn YARN_CACHE_FOLDER=/root/.yarn yarn --frozen-lockfile --network-timeout=100000
-
-# Build
+# Build Next.js app
+ENV NODE_ENV=production
 RUN yarn build
 
-# Stage 2: run
+
+############################
+# Stage 2: Runtime
+############################
 FROM node:20-bookworm-slim
+
 WORKDIR /app
+
+# Copy build artifacts
 COPY --from=builder /app/geomapviewer-main/.next ./.next
 COPY --from=builder /app/geomapviewer-main/public ./public
 COPY --from=builder /app/geomapviewer-main/node_modules ./node_modules
 COPY --from=builder /app/geomapviewer-main/package.json ./
 
-# Copy entrypoint script
-COPY ./docker-entrypoint.sh ./
+ENV NODE_ENV=production
+ENV NEXT_TELEMETRY_DISABLED=1
+
+# Copy entrypoint
+COPY docker-entrypoint.sh ./
 RUN chmod +x docker-entrypoint.sh
+
+EXPOSE 3000
 
 ENTRYPOINT ["./docker-entrypoint.sh"]
