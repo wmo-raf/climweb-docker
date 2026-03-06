@@ -111,7 +111,6 @@ Save and exit:
 
 ```bash
 docker network ls
-docker compose build
 docker compose up -d
 ```
 

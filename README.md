@@ -13,50 +13,52 @@ Read more from the user guide - [climweb.readthedocs.io](https://climweb.readthe
 Before installing ClimWeb, consider installing on your server:
 
 1. **Docker Engine & Docker Compose Plugin :** Ensure that Docker Engine is installed and running on the machine where you plan to execute the docker-compose command https://docs.docker.com/engine/install/. Docker Engine is the runtime environment for containers.
+2. **Port 80** - Ensure port 80 is available. No other services or applications should be running or listening on port 80.
 
 ## ClimWeb Installation Instructions
 
 ### 1. Download from source:
 
-```sh
+```bash
 git clone https://github.com/wmo-raf/climweb-docker.git climweb
 ```
 
-```sh
+```bash
 cd climweb
 ```
 
 ---
 
-### 2. Copy Docker Compose Configuration
+### 2. Setup CLIMWEB
 
-```sh
-cp docker-compose.yml.sample docker-compose.yml
+```bash
+bash setup.sh
 ```
 
-### 3. Copy Nginx Configuration
+Input variables approriately when prompted. See [environmental variables section](#environmental-variables) below
 
-```sh
-cp nginx/nginx.conf.sample nginx/nginx.conf
-```
-
-### 4. Setup environmental variables
-
-Prepare a '.env' file with necessary variables from '.env.sample'
-
-```sh
-cp .env.sample .env
-```
-
-```sh
-nano .env
-```
-
-Edit and replace variables approriately. See [environmental variables section](#environmental-variables) below
+Once successfully completed, the instance can be found at `http://{IP_ADDRESS/HOST}`
 
 ---
 
-### 5. Set up Webhook
+### 3. Create superuser to access the CMS Admin interface:
+
+Log in to container interactive command line interface
+
+```bash
+docker exec -it climweb /bin/bash
+```
+
+Create superuser providing username, email and strong password
+
+```bash
+climweb createsuperuser
+```
+
+The admin instance can be found at `http://localhost/{CMS_ADMIN_URL_PATH}`
+
+
+### 4. Set up Webhook
 
 [Webhook](https://github.com/adnanh/webhook) helps to automate some tasks that otherwise need to be done manually. For example upgrading the CMS to a newer version.
 
@@ -72,7 +74,7 @@ sudo apt-get install webhook
 
 From the root project directory (where you cloned this project) run:
 
-```
+```bash
 sh webhook-config.sh
 ```
 
@@ -82,24 +84,24 @@ We will use this file to run [Webhook](https://github.com/adnanh/webhook)
 
 ---
 
-### 6. Running Webhook server with Supervisor
+### 5. Running Webhook server with Supervisor
 
 Install supervisor to keep the webhook server running in the background.
 
-```
+```bash
 sudo apt install supervisor
 ```
 
 Create a `webhook.conf` file in `/etc/supervisor/conf.d/`
 
-```
+```bash
 cd /etc/supervisor/conf.d
 sudo nano webhook.conf
 ```
 
 Add the following inside the `webhook.conf` file
 
-```
+```conf
 [program:webhook]
 command=webhook -hooks /path_to_project_dir/webhook/hooks.yaml -verbose
 autostart=true
@@ -112,7 +114,7 @@ Save the file.
 
 After creating the configuration, tell `supervisord` to refresh its configuration and start the service:
 
-```
+```bash
 sudo supervisorctl reread
 sudo supervisorctl update
 sudo supervisorctl status
@@ -126,63 +128,6 @@ You can now set the  `CMS_UPGRADE_HOOK_URL` env variable to:
 `http://host.docker.internal:9000/hooks/cms-upgrade`
 
 Note this a special docker network url accessed only from inside the `cms_web` docker container.
-
----
-
-
-### 7. Build and launch a running instance of the CMS.
-
-Navigate back to climweb project directory using commmand
-
-```sh
-cd path_to/climweb
-```
-
-```sh
-docker compose build
-```
-
-```sh
-docker compose up -d
-```
-
-
-```sh
-docker compose logs -f --tail 100
-```
-
-The instance can be found at `http://localhost:{CMS_PORT}`
-
----
-
-### 8. Static, Media and backup files persmission
-
-Type the follwoing command and retrieve and replace the UID and GID in the second command
-
-`id`
-
-`sudo chown -R UID:GID climweb/static`
-
-`sudo chown -R UID:GID climweb/media`
-
-`sudo chown -R UID:GID climweb/backup`
-
-
-### 8. Finally, create superuser to access the CMS Admin interface:
-
-Log in to container interactive command line interface
-
-```sh
-docker exec -it climweb /bin/bash
-```
-
-Create superuser providing username, email and strong password
-
-```sh
-climweb createsuperuser
-```
-
-The admin instance can be found at `http://localhost:{CMS_PORT}/{CMS_ADMIN_URL_PATH}`
 
 ---
 
