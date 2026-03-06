@@ -25,7 +25,7 @@ else
     set +e
 
     # build containers
-    docker compose build --build-arg CLIMWEB_VERSION="$NEW_CLIMWEB_VERSION"
+    docker pull ghcr.io/wmo-raf/climweb:v"$NEW_CLIMWEB_VERSION"
 
     # Check the exit code
     if [ $? -ne 0 ]; then

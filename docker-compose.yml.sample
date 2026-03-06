@@ -92,18 +92,10 @@ services:
     restart: unless-stopped
 
   climweb:
-    image: climweb
+    image: ghcr.io/wmo-raf/climweb:v${CLIMWEB_VERSION}
+    user: "${UID}:${GID}"
     container_name: climweb
-    platform: linux/x86_64
-    build:
-      context: ./climweb
-      dockerfile: Dockerfile
-      network: host
-      args:
-        - CLIMWEB_VERSION=${CLIMWEB_VERSION}
-        - UID=${UID}
-        - GID=${GID}
-        - DOCKER_COMPOSE_WAIT_PLATFORM_SUFFIX=${DOCKER_COMPOSE_WAIT_PLATFORM_SUFFIX:-}
+    # platform: linux/x86_64
     restart: unless-stopped
     expose:
       - 8000
@@ -121,17 +113,10 @@ services:
       - ${NPM_SSL_VOLUME:-./climweb/npm_ssl}:/npm/ssl
 
   climweb_celery_worker:
-    image: climweb
+    image: ghcr.io/wmo-raf/climweb:v${CLIMWEB_VERSION}
+    user: "${UID}:${GID}"
     container_name: climweb_celery_worker
-    platform: linux/x86_64
-    build:
-      context: ./climweb
-      network: host
-      dockerfile: Dockerfile
-      args:
-        - CLIMWEB_VERSION=${CLIMWEB_VERSION}
-        - UID=${UID}
-        - GID=${GID}
+    # platform: linux/x86_64
     init: true
     command: celery-worker
     restart: unless-stopped
@@ -145,16 +130,10 @@ services:
       - ${NPM_SSL_VOLUME:-./climweb/npm_ssl}:/npm/ssl
       
   climweb_celery_beat:
-    image: climweb
+    image: ghcr.io/wmo-raf/climweb:v${CLIMWEB_VERSION}
+    user: "${UID}:${GID}"
     container_name: climweb_celery_beat
-    platform: linux/x86_64
-    build:
-      context: ./climweb
-      dockerfile: Dockerfile
-      args:
-        - CLIMWEB_VERSION=${CLIMWEB_VERSION}
-        - UID=${UID}
-        - GID=${GID}
+    # platform: linux/x86_64
     init: true
     command: celery-beat
     restart: unless-stopped
@@ -167,29 +146,7 @@ services:
       - ${BACKUP_VOLUME}:/climweb/web/src/climweb/backup
 
   climweb_mapviewer:
-    image: climweb_mapviewer
-    container_name: climweb_mapviewer
-    restart: unless-stopped
-    platform: linux/x86_64
-    build:
-      context: ./mapviewer
-      network: host
-      args:
-        - CMS_API=${MAPVIEWER_CMS_API}
-        - BASE_PATH=${MAPVIEWER_BASE_PATH}
-        - ASSET_PREFIX=${MAPVIEWER_ASSET_PREFIX}
-        - ANALYTICS_PROPERTY_ID=${ANALYTICS_PROPERTY_ID}
-        - BITLY_TOKEN=${BITLY_TOKEN}
-        - GOOGLE_CUSTOM_SEARCH_CX=${GOOGLE_CUSTOM_SEARCH_CX}
-        - GOOGLE_SEARCH_API_KEY=${GOOGLE_SEARCH_API_KEY}
-        - NEXT_TELEMETRY_DISABLED=1
-    volumes:
-      - ${MAPVIEWER_NEXT_STATIC_VOLUME}:/app/nginx/.next/static
-    ports:
-      - "3000"
-
-  climweb_mapviewer:
-    image: ghcr.io/wmo-raf/mapviewer:latest
+    image: ghcr.io/wmo-raf/geomapviewer:latest
     container_name: climweb_mapviewer
     restart: unless-stopped
     environment:

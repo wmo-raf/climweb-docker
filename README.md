@@ -139,10 +139,6 @@ cd path_to/climweb
 ```
 
 ```sh
-docker compose build
-```
-
-```sh
 docker compose up -d
 ```
 
