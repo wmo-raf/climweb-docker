@@ -32,7 +32,7 @@ cd climweb
 ### 2. Setup CLIMWEB
 
 ```bash
-bash setup.sh
+make setup
 ```
 
 Input variables approriately when prompted. See [environmental variables section](#environmental-variables) below
@@ -43,16 +43,10 @@ Once successfully completed, the instance can be found at `http://{IP_ADDRESS/HO
 
 ### 3. Create superuser to access the CMS Admin interface:
 
-Log in to container interactive command line interface
-
-```bash
-docker exec -it climweb /bin/bash
-```
-
 Create superuser providing username, email and strong password
 
 ```bash
-climweb createsuperuser
+make createsuperuser
 ```
 
 The admin instance can be found at `http://localhost/{CMS_ADMIN_URL_PATH}`
@@ -129,6 +123,17 @@ You can now set the  `CMS_UPGRADE_HOOK_URL` env variable to:
 
 Note this a special docker network url accessed only from inside the `cms_web` docker container.
 
+Then rebubild and restart climweb with these commands
+
+```bash
+cd
+
+cd climweb
+
+make build
+
+make restart
+```
 ---
 
 
@@ -148,6 +153,12 @@ Update `.env`
 ```
 CLIMWEB_ENABLE_OTEL=True
 HONEYCOMB_API_KEY=
+```
+
+Then rebubild and restart climweb with these commands
+
+```bash
+make build && make restart
 ```
 
 ---

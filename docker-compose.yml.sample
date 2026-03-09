@@ -148,6 +148,7 @@ services:
   climweb_mapviewer:
     image: ghcr.io/wmo-raf/geomapviewer:latest
     container_name: climweb_mapviewer
+    platform: linux/x86_64
     restart: unless-stopped
     environment:
       CMS_API: ${MAPVIEWER_CMS_API}
@@ -160,7 +161,7 @@ services:
     volumes:
       - ${MAPVIEWER_NEXT_STATIC_VOLUME}:/app/nginx/.next/static
     ports:
-      - "3000:3000"
+      - "3000"
       
 
   climweb_nginx:

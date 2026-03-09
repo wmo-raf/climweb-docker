@@ -126,6 +126,7 @@ CMS_DEFAULT_LANGUAGE_CODE=$(prompt_default \
 CMS_BASE_URL="http://$IP_ADDRESS"
 CSRF_TRUSTED_ORIGINS="http://$IP_ADDRESS,http://$IP_ADDRESS:$CMS_PORT"
 MAPVIEWER_CMS_API="http://$IP_ADDRESS/api"
+ALLOWED_HOSTS="$IP_ADDRESS"
 
 # -------- prepare config --------
 
@@ -160,6 +161,7 @@ set_env CSRF_TRUSTED_ORIGINS "$CSRF_TRUSTED_ORIGINS"
 set_env MAPVIEWER_CMS_API "$MAPVIEWER_CMS_API"
 set_env TIME_ZONE "$TIME_ZONE"
 set_env CMS_DEFAULT_LANGUAGE_CODE "$CMS_DEFAULT_LANGUAGE_CODE"
+set_env ALLOWED_HOSTS "$ALLOWED_HOSTS"
 
 rm -f .env.bak
 
@@ -168,6 +170,8 @@ success "Environment configuration created."
 # -------- start containers --------
 
 section "Starting ClimWeb"
+
+docker compose pull
 
 docker compose up -d
 
