@@ -97,7 +97,7 @@ Add the following inside the `webhook.conf` file
 
 ```conf
 [program:webhook]
-command=webhook -hooks /path_to_project_dir/webhook/hooks.yaml -verbose
+command=webhook -hooks /path_to_climweb_dir/webhook/hooks.yaml -verbose
 autostart=true
 autorestart=true
 startretries=3
@@ -126,9 +126,8 @@ Note this a special docker network url accessed only from inside the `cms_web` d
 Then rebubild and restart climweb with these commands
 
 ```bash
-cd
 
-cd climweb
+cd /path_to_climweb_dir/
 
 make restart
 ```
