@@ -95,7 +95,7 @@ services:
     image: ghcr.io/wmo-raf/climweb:v${CLIMWEB_VERSION}
     user: "${UID}:${GID}"
     container_name: climweb
-    # platform: linux/x86_64
+    platform: linux/x86_64
     restart: unless-stopped
     expose:
       - 8000
@@ -116,7 +116,7 @@ services:
     image: ghcr.io/wmo-raf/climweb:v${CLIMWEB_VERSION}
     user: "${UID}:${GID}"
     container_name: climweb_celery_worker
-    # platform: linux/x86_64
+    platform: linux/x86_64
     init: true
     command: celery-worker
     restart: unless-stopped
@@ -133,7 +133,7 @@ services:
     image: ghcr.io/wmo-raf/climweb:v${CLIMWEB_VERSION}
     user: "${UID}:${GID}"
     container_name: climweb_celery_beat
-    # platform: linux/x86_64
+    platform: linux/x86_64
     init: true
     command: celery-beat
     restart: unless-stopped
