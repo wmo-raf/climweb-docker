@@ -130,8 +130,6 @@ cd
 
 cd climweb
 
-make build
-
 make restart
 ```
 ---
