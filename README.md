@@ -155,10 +155,10 @@ CLIMWEB_ENABLE_OTEL=True
 HONEYCOMB_API_KEY=
 ```
 
-Then rebubild and restart climweb with these commands
+Then restart climweb with this commands
 
 ```bash
-make build && make restart
+make restart
 ```
 
 ---
