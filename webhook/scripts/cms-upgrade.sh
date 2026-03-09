@@ -41,6 +41,7 @@ else
 
       echo "********* Restarting containers.... *************"
       # restart
+      docker compose pull
       docker compose up -d --force-recreate
     fi
   fi
