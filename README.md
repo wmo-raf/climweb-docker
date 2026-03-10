@@ -8,16 +8,34 @@ Content Management System for NMHSs in Africa
 Read more from the user guide - [climweb.readthedocs.io](https://climweb.readthedocs.io/)
 
 
-## Prerequisites
-
-Before installing ClimWeb, consider installing on your server:
-
-1. **Docker Engine & Docker Compose Plugin :** Ensure that Docker Engine is installed and running on the machine where you plan to execute the docker-compose command https://docs.docker.com/engine/install/. Docker Engine is the runtime environment for containers.
-2. **Port 80** - Ensure port 80 is available. No other services or applications should be running or listening on port 80.
 
 ## ClimWeb Installation Instructions
 
-### 1. Download from source:
+### 1. Install Docker Engine & Docker Compose Plugin (skip if docker is already installed
+
+**Docker Engine & Docker Compose Plugin :** Ensure that Docker Engine is installed and running on the machine where you plan to execute the docker-compose command https://docs.docker.com/engine/install/. Docker Engine is the runtime environment for containers.
+
+>Note **Port 80** - Ensure **port 80** is available. No other services or applications should be running or listening on port 80.
+
+### 2. Manage Docker as a non-root user
+
+To create the docker group and add your user:
+
+```bash
+sudo groupadd docker
+
+sudo usermod -aG docker $USER
+```
+
+Activate the changes to groups:
+
+```bash
+newgrp docker
+```
+
+---
+
+### 3. Download climweb source:
 
 ```bash
 git clone https://github.com/wmo-raf/climweb-docker.git climweb
@@ -29,7 +47,7 @@ cd climweb
 
 ---
 
-### 2. Setup CLIMWEB
+### 4. Setup CLIMWEB
 
 ```bash
 make setup
@@ -39,9 +57,7 @@ Input variables approriately when prompted. See [environmental variables section
 
 Once successfully completed, the instance can be found at `http://{IP_ADDRESS/HOST}`
 
----
-
-### 3. Create superuser to access the CMS Admin interface:
+### 5. Create superuser to access the CMS Admin interface:
 
 Create superuser providing username, email and strong password
 
@@ -51,6 +67,7 @@ make createsuperuser
 
 The admin instance can be found at `http://localhost/{CMS_ADMIN_URL_PATH}`
 
+---
 
 ### 4. Set up Webhook
 
