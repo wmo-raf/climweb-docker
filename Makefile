@@ -13,7 +13,7 @@ pull:
 	docker compose pull
 
 start:
-	docker compose up -d
+	docker compose pull && docker compose up -d 
 
 stop:
 	docker compose stop
