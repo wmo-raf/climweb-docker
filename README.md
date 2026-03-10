@@ -45,7 +45,6 @@ git clone https://github.com/wmo-raf/climweb-docker.git climweb
 cd climweb
 ```
 
----
 
 ### 4. Setup CLIMWEB
 
@@ -53,7 +52,11 @@ cd climweb
 make setup
 ```
 
-Input variables approriately when prompted. See [environmental variables section](#environmental-variables) below
+Input variables approriately when prompted. See [environmental variables section](#environmental-variables) 
+
+```bash
+make start
+```
 
 Once successfully completed, the instance can be found at `http://{IP_ADDRESS/HOST}`
 
@@ -65,11 +68,11 @@ Create superuser providing username, email and strong password
 make createsuperuser
 ```
 
-The admin instance can be found at `http://localhost/{CMS_ADMIN_URL_PATH}`
+The admin instance can be found at `http://{IP_ADDRESS}/cms-admin`
 
 ---
 
-### 4. Set up Webhook
+### 6. Set up Webhook
 
 [Webhook](https://github.com/adnanh/webhook) helps to automate some tasks that otherwise need to be done manually. For example upgrading the CMS to a newer version.
 
@@ -95,7 +98,7 @@ We will use this file to run [Webhook](https://github.com/adnanh/webhook)
 
 ---
 
-### 5. Running Webhook server with Supervisor
+### 7. Running Webhook server with Supervisor
 
 Install supervisor to keep the webhook server running in the background.
 
