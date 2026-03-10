@@ -2,20 +2,13 @@
 
 Content Management System for NMHSs in Africa
 
-
-## User Guide
-
-Read more from the user guide - [climweb.readthedocs.io](https://climweb.readthedocs.io/)
-
-
-
-## ClimWeb Installation Instructions
-
 ### 1. Install Docker Engine & Docker Compose Plugin (skip if docker is already installed
 
 **Docker Engine & Docker Compose Plugin :** Ensure that Docker Engine is installed and running on the machine where you plan to execute the docker-compose command https://docs.docker.com/engine/install/. Docker Engine is the runtime environment for containers.
 
 >Note **Port 80** - Ensure **port 80** is available. No other services or applications should be running or listening on port 80.
+
+
 
 ### 2. Manage Docker as a non-root user
 
@@ -35,6 +28,8 @@ newgrp docker
 
 ---
 
+
+
 ### 3. Download climweb source:
 
 ```bash
@@ -44,6 +39,7 @@ git clone https://github.com/wmo-raf/climweb-docker.git climweb
 ```bash
 cd climweb
 ```
+
 
 
 ### 4. Setup CLIMWEB
@@ -60,6 +56,8 @@ make start
 
 Once successfully completed, the instance can be found at `http://{IP_ADDRESS/HOST}`
 
+
+
 ### 5. Create superuser to access the CMS Admin interface:
 
 Create superuser providing username, email and strong password
@@ -72,183 +70,27 @@ The admin instance can be found at `http://{IP_ADDRESS}/cms-admin`
 
 ---
 
-### 6. Set up Webhook
-
-[Webhook](https://github.com/adnanh/webhook) helps to automate some tasks that otherwise need to be done manually. For example upgrading the CMS to a newer version.
-
-The [Webhook](https://github.com/adnanh/webhook) package needs to be installed on your server (`NOT` in a docker container)
-
-Install the [Webhook](https://github.com/adnanh/webhook) package for your OS as described [here](https://github.com/adnanh/webhook/tree/master#using-package-manager)
-
-If on Ubuntu or Debian, you can run:
-
-```
-sudo apt-get install webhook
-```
-
-From the root project directory (where you cloned this project) run:
-
-```bash
-sh webhook-config.sh
-```
-
-This will create a new file `webhook/hooks.yaml` with the correct paths in place, using the `webhook/hooks.yaml.sample` file
-
-We will use this file to run [Webhook](https://github.com/adnanh/webhook)
-
----
-
-### 7. Running Webhook server with Supervisor
-
-Install supervisor to keep the webhook server running in the background.
-
-```bash
-sudo apt install supervisor
-```
-
-Create a `webhook.conf` file in `/etc/supervisor/conf.d/`
-
-```bash
-cd /etc/supervisor/conf.d
-sudo nano webhook.conf
-```
-
-Add the following inside the `webhook.conf` file
-
-```conf
-[program:webhook]
-command=webhook -hooks /path_to_climweb_dir/webhook/hooks.yaml -verbose
-autostart=true
-autorestart=true
-startretries=3
-startsecs=0
-```
-
-Save the file.
-
-After creating the configuration, tell `supervisord` to refresh its configuration and start the service:
-
-```bash
-sudo supervisorctl reread
-sudo supervisorctl update
-sudo supervisorctl status
-```
-
-If everything is ok, `Webhook` is now set and ready to be used.
 
 
-You can now set the  `CMS_UPGRADE_HOOK_URL` env variable to:
+**Next Steps** [Manage Climweb Version Upgrades](https://github.com/wmo-raf/climweb-docker/blob/main/webhook-setup.md#manage-climweb-upgrades)
 
-`http://host.docker.internal:9000/hooks/cms-upgrade`
+## Useful Resources
 
-Note this a special docker network url accessed only from inside the `cms_web` docker container.
+- User Guide - [climweb.readthedocs.io](https://climweb.readthedocs.io/)
+- [Environmental Variables](https://github.com/wmo-raf/climweb-docker/blob/main/environmental-variables.md#environmental-variables)
+- [Backup Climweb to Google Drive / One Drive everyday](https://github.com/wmo-raf/climweb-backup-sync/tree/main?tab=readme-ov-file#climweb-backup-to-google-drive--one-drive)
+- [Backup Climweb to another server everyday](https://github.com/wmo-raf/climweb-backup-sync/blob/main/Backup-to-Remote-Server.md)
+- [Migrate Climweb from one server to another](https://github.com/wmo-raf/climweb-docker/blob/main/migrate-from-server-to-server.md#migrating-climweb-from-one-remote-server-to-another)
+- [Manage Climweb Upgrades](https://github.com/wmo-raf/climweb-docker/blob/main/webhook-setup.md#manage-climweb-upgrades)
 
-Then rebubild and restart climweb with these commands
-
-```bash
-
-cd /path_to_climweb_dir/
-
-make restart
-```
----
-
-
-### Setup Observability (Logging + Metrics) - optional
-
-ClimWeb uses [OpenTelemetry](https://opentelemetry.io/) to collect logs and metrics. The `docker-compose.yml` file includes an [opentelemetry-collector](https://opentelemetry.io/docs/collector/) that provides a vendor-agonistic way to gather observability data.
-
-A default configuration that uses the [Honeycomb](https://www.honeycomb.io/) platform is provided. Honeycomb provides a generous free tier to get you started. 
-
-Custom collectors can be used by setting the collector endpoint env variable `OTEL_EXPORTER_OTLP_ENDPOINT` and commenting out the `climweb_otel_collector` service, or configuring the `climweb_otel_collector` to what suits you.
-
-To use the default setup, create a [free Honeycomb account](https://ui.honeycomb.io/signup) and get your API Key from `Account > Team Settings` menu
-
-
-Update `.env`
-
-```
-CLIMWEB_ENABLE_OTEL=True
-HONEYCOMB_API_KEY=
-```
-
-Then restart climweb with this commands
-
-```bash
-make restart
-```
-
----
-
-# Environmental Variables
-Environmental variables for docker compose. All Should be placed in a single `.env` file, saved in the same folder
-as `docker-compose.yml` file
-
-
-## CMS Web Variables
-
-
-| Variable    | Description       | Required | Default | More Details |
-|:------------|-------------------|:---------|:--------|:-------------|
-| CMS_DB_USER | CMS Database user | YES      |         |              |
-| CMS_DB_NAME | CMS Database name | YES      |         |              |
-| CMS_DB_PASSWORD          | CMS Database password.                                                                                                                                                                                                                                | YES      |         |
-| CMS_DB_VOLUME            | Mounted docker volume path for persisting database data                                                                                                                                                                                              | YES      |         |                                                                                                       |
-| CMS_SITE_NAME            | The human-readable name of your Wagtail installation which welcomes users upon login to the Wagtail admin.                                                                                                                                           | YES      |         |                                                                                                       |
-| CMS_ADMIN_URL_PATH       | Base Path to admin pages. Do not use `admin` or an easy to guess path. Should be one word and can include an hyphen. DO NOT include any slashes at the start or the end.                                                                                                                                                                           | YES      |         |                                                                                                       |
-| CMS_DEBUG                | A boolean that turns on/off debug mode. Never deploy a site into production with DEBUG turned on                                                                                                                                                     | NO       | False   |                                                                                                       |
-| CMS_PORT                 | Port to run cms                                                                                                                                                                                                                                      | YES      | 80      |                                                                                                       |
-| CMS_BASE_URL             | This is the base URL used by the Wagtail admin site. It is typically used for generating URLs to include in notification emails. | NO  |  |   |
-| CMS_DEFAULT_LANGUAGE_CODE| The language code for the CMS. Availabe codes are `en` for English, `fr` from French, `ar` for Arabic, `am` for Amharic, `es` for Spanish, `sw` for Swahili. Default is `en` if not set| NO|en
-| CSRF_TRUSTED_ORIGINS     | This variable can be set when CMS_PORT is not 80 e.g if CMS_PORT=8000, CSRF_TRUSTED_ORIGINS would be the following: http://{YOUR_IP_ADDRESS}:8000, http://{YOUR_IP_ADDRESS}, http://localhost:8000 and http://127.0.0.1:8000                                                   | NO       |         |                                                                                                       |
-| TIME_ZONE                | A string representing the time zone for this installation. See the [list of time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones). Set this to your country timezone                                                             | NO       | UTC     | [List of tz database time zones](https://en.wikipedia.org/wiki/List_of_tz_database_time_zones)        |
-| SECRET_KEY               | A secret key for a particular Django installation. This is used to provide cryptographic signing, and should be set to a unique, unpredictable value. Django will refuse to start if SECRET_KEY is not set                                           | YES      |         | You can use this online tool [https://djecrety.ir](https://djecrety.ir/) to generate the key and paste                                                                                                    |
-| ALLOWED_HOSTS            | A list of strings representing the host/domain names that this Django site can serve. This is a security measure to prevent HTTP Host header attacks, which are possible even under many seemingly-safe web server configurations.                   | YES      |         | [Django Allowed Hosts](https://docs.djangoproject.com/en/4.2/ref/settings/#std-setting-ALLOWED_HOSTS) |                                                                                                                                                                                                                          |          |         |                                                                                                       |
-| SMTP_EMAIL_HOST          | The host to use for sending email                                                                                                                                                                                                                    | NO       |         |                                                                                                       |
-| SMTP_EMAIL_PORT          | Port to use for the SMTP server defined in `SMTP_EMAIL_HOST`                                                                                                                                                                                         | NO       | 25      |                                                                                                       |
-| SMTP_EMAIL_USE_TLS       | Whether to use a TLS (secure) connection when talking to the SMTP server. This is used for explicit TLS connections, generally on port 587                                                                                                           | NO       | True    |                                                                                                       |
-| SMTP_EMAIL_HOST_USER     | Username to use for the SMTP server defined in `SMTP_EMAIL_HOST`. If empty, Django won’t attempt authentication.                                                                                                                                     | NO       |         |                                                                                                       |
-| SMTP_EMAIL_HOST_PASSWORD | Password to use for the SMTP server defined in `SMTP_EMAIL_HOST`. This setting is used in conjunction with `SMTP_EMAIL_HOST_USER` when authenticating to the SMTP server. If either of these settings is empty, Django won’t attempt authentication. | NO       |         |                                                                                                       |
-| CMS_ADMINS               | A list of all the people who get code error notifications, in format `"Name <name@example.com>, Another Name <another@example.com>"`                                                                                                                 | NO       |         |                                                                                                       |
-| DEFAULT_FROM_EMAIL       | Default email address to use for various automated correspondence from the site manager(s)                                                                                                                                                           | NO       |         |                                                                                                       |
-| RECAPTCHA_PUBLIC_KEY     | Google Recaptcha Public Key. https://www.google.com/recaptcha/about/ will need a Google account for RECAPTCHA_PRIVATE_KEY and RECAPTCHA_PUBLIC_KEY creation                                                   | NO       |         |                                                                                                       |
-| RECAPTCHA_PRIVATE_KEY    | Google Recaptcha Private Key                                                                                                                                                                                                                         | NO       |         |                                                                                                       |
-| CMS_NUM_OF_WORKERS       | Gunicorn number of workers. Recommended value should be `(2 x $num_cores) + 1 `. For example, if your server has `4 CPU Cores`, this value should be set to `9`, which is the result of `(2 x 4) + 1 = 9`                                            | YES      |         | [Gunicorn Workers details](https://docs.gunicorn.org/en/latest/design.html#how-many-workers)          |
-| CMS_STATIC_VOLUME        | Mounted docker volume path for persisting CMS static files          | YES      | ./climeb/static        |                                                                                                       |
-| CMS_MEDIA_VOLUME         | Mounted docker volume path for persisting CMS media files     | YES      | ./climeb/media       |                                                                                                       |
-| CMS_UPGRADE_HOOK_URL     | [Webhook](https://github.com/adnanh/webhook) url to your server that triggers a cms upgrade script      | NO      |         |                                                                                                       |
-| BACKUP_VOLUME     | Mounted docker volume path for persisting Backup dp and media files      | YES      | ./climeb/backup   |                                                                                                       |
-
-## MQTT Broker Variables
-| Variable                     | Description | Required | Default                                                                                                                                                                          |
-|------------------------------|-------------|----------|-------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| CMS_BROKER_USERNAME | Username for MQTT broker| YES| cms |
-| CMS_BROKER_PASSWORD | Password for MQTT broker| YES|     |
-| CMS_BROKER_QUEUE_MAX| The maximum number of QoS 1 or 2 messages to hold in the queue (per client) above those messages that are currently in flight. See for details here [https://mosquitto.org/man/mosquitto-conf-5.html](https://mosquitto.org/man/mosquitto-conf-5.html) | YES | 1000 |
-
-
-## MapViewer Variables
-
-| Variable                     | Description                                                                                                                                                                          |
-|------------------------------|--------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| MAPVIEWER_CMS_API            | CMS API Endpoint for MapViewer. This should be the public path to your CMS root url , followed by `/api`. For example `https://met.example.com/api`                                  |
-| MAPVIEWER_NEXT_STATIC_VOLUME | Mounted docker volume path for MapViewer static files                                                                                                                                |
-| BITLY_TOKEN                  | [Bitly](https://bitly.com/) access token. The MapViewer uses Bitly for url shortening. See [here](https://dev.bitly.com/docs/getting-started/authentication/) on how to generate one |
-| ANALYTICS_PROPERTY_ID        |                                                                                                                                                                                      |
-| GOOGLE_CUSTOM_SEARCH_CX      |                                                                                                                                                                                      |
-| GOOGLE_SEARCH_API_KEY        |      |                                                 
 
 
 # Other useful commands 
 
 | Purpose           | Command |  Instructions        |                                                                                                                                                                                                      
 |-------------------|-----------|-----------------------------------------------------------------------------|
-| docker configurations          | `docker compose config` | validate and view the Compose file configuration               |
-| login to shell          | `docker exec -it {container} /bin/bash` | interact with the container's command line and execute commands as if you were directly logged into the container |
-| login to shell as root user      | `docker exec -u -0 -it {container} /bin/bash` | access a running Docker container and open a Bash shell inside it with the root user                                                                                                                                
-| read docker logs            | `docker compose logs --follow {containers}` | real-time output of the containers' logs                                   |
-| stop/remove docker containers       | `docker compose down --remove-orphans {containers}` | stop and remove Docker containers                                          |
-| check containers status          | `docker compose  ps {containers}` | display container names, their status (running, stopped), the associated services, and their respective health states  |
-| generate city forecasts from external source        | use the `login` command above and execute `python manage.py generate_forecast` | used for fetching 7-day forecast from external source (https://developer.yr.no/)       |
-| setup mautic instance    | `docker compose --file docker-compose.mautic.yml --file docker-compose.yml build {containers}` followed by `docker compose --file docker-compose.mautic.yml --file docker-compose.yml {DOCKER_COMPOSE_ARGS} up -d` | setup mautic environmental variables i.e `MAUTIC_DB_USER`,`MAUTIC_DB_PASSWORD` and  `MYSQL_ROOT_PASSWORD`  then execute command |
-
+| login to shell          | `make shell` | interact with the container's command line and execute commands as if you were directly logged into the container |
+| read docker logs            | `make logs` | real-time output of the containers' logs                                   |
+| stop/remove docker containers       | `make down` | stop and remove Docker containers                                          |
+| check containers status          | `make status` | display container names, their status (running, stopped), the associated services, and their respective health states  |
+| generate city forecasts from external source        | `make generate_forecast` | used for fetching 7-day forecast from external source (https://developer.yr.no/)       |
