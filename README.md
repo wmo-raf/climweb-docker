@@ -2,7 +2,7 @@
 
 Content Management System for NMHSs in Africa
 
-### 1. Install Docker Engine & Docker Compose Plugin (skip if docker is already installed
+### 1. Install Docker Engine & Docker Compose Plugin (skip if docker is already installed)
 
 **Docker Engine & Docker Compose Plugin :** Ensure that Docker Engine is installed and running on the machine where you plan to execute the docker-compose command https://docs.docker.com/engine/install/. Docker Engine is the runtime environment for containers.
 
@@ -48,7 +48,7 @@ cd climweb
 make setup
 ```
 
-Input variables approriately when prompted. See [environmental variables section](#environmental-variables) 
+Input variables approriately when prompted. See [Environmental Variables](https://github.com/wmo-raf/climweb-docker/blob/main/environmental-variables.md#environmental-variables) 
 
 ```bash
 make start
