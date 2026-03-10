@@ -165,19 +165,6 @@ set_env ALLOWED_HOSTS "$ALLOWED_HOSTS"
 
 rm -f .env.bak
 
-success "Environment configuration created."
-
-# -------- start containers --------
-
-section "Starting ClimWeb"
-
-docker compose pull
-
-docker compose up -d
-
-success "ClimWeb installation complete."
-
-echo ""
-echo -e "${GREEN}Access the CMS at:${NC}"
-echo -e "${BLUE}http://$IP_ADDRESS${NC}" | tr -d '\n$'
-echo ""
+success "Environment configuration created. 
+Run the command below to start climweb \
+> make start"
