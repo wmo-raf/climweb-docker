@@ -34,5 +34,8 @@ shell:
 createsuperuser:
 	docker exec -it $(CONTAINER) /bin/bash -c "climweb createsuperuser"
 
+generate_forecast:
+	docker exec -it $(CONTAINER) /bin/bash -c "climweb generate_forecast"
+
 status:
 	docker compose ps
