@@ -46,7 +46,7 @@ x-climweb-variables: &climweb-variables
   OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:-0.1}
   OTEL_PER_MODULE_SAMPLER_OVERRIDES: ${OTEL_PER_MODULE_SAMPLER_OVERRIDES:-opentelemetry.instrumentation.django=always_on}
   CLIMWEB_DEPLOYMENT_ENV: ${CLIMWEB_DEPLOYMENT_ENV:-production}
-  IS_METEOROLOGICAL: ${IS_METEOROLOGICAL:-False}
+  IS_METEOROLOGICAL: ${IS_METEOROLOGICAL:-True}
 
 services:
   climweb_db:
