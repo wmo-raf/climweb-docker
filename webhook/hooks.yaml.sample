@@ -1,3 +1,39 @@
+- id: plugin-manage
+  execute-command: WORKING_DIR/webhook/scripts/plugin-manage.sh
+  command-working-directory: "WORKING_DIR"
+  response-message: "Plugin management command sent successfully"
+  http-methods:
+    - POST
+  incoming-payload-content-type: "application/json"
+  pass-arguments-to-command:
+    - source: payload
+      name: action
+    - source: payload
+      name: repo_url
+    - source: payload
+      name: plugin_name
+  trigger-rule:
+    and:
+      - match:
+          type: value
+          value: "UPGRADE_WEBHOOK_SECRET_PLACEHOLDER"
+          parameter:
+            source: header
+            name: X-Webhook-Secret
+      - match:
+          type: regex
+          regex: ^(install|update|remove)$
+          parameter:
+            source: payload
+            name: action
+      - match:
+          type: regex
+          regex: ^.+
+          parameter:
+            source: payload
+            name: plugin_name
+  trigger-rule-mismatch-http-response-code: 400
+
 - id: cms-upgrade
   execute-command: WORKING_DIR/webhook/scripts/cms-upgrade.sh
   command-working-directory: "WORKING_DIR"

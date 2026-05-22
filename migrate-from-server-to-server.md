@@ -74,6 +74,18 @@ scp climweb/backup/*.tar user@NEW_IP_ADDRESS:CLIMWEB_PATH/climweb/backup
 
 ---
 
+### Copy Plugins to the New Server
+
+If you have any plugins installed, copy the plugins directory so they are available on the new server:
+
+```bash
+scp -r climweb/plugins user@NEW_IP_ADDRESS:CLIMWEB_PATH/climweb/plugins
+```
+
+> Plugins are loaded automatically on container startup. No reinstallation is needed after copying.
+
+---
+
 ### Copy `.env` File to the New Server
 
 ```bash
@@ -111,7 +123,6 @@ Save and exit:
 
 ```bash
 docker network ls
-docker compose build
 docker compose up -d
 ```
 
@@ -125,6 +136,8 @@ sudo chown -R UID:GID climweb/static
 sudo chown -R UID:GID climweb/media
 
 sudo chown -R UID:GID climweb/backup
+
+sudo chown -R UID:GID climweb/plugins
 ```
 
 *(Replace `UID` and `GID` with the values from your `.env` file.)*

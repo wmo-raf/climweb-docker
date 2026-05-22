@@ -1,10 +1,9 @@
 # syntax = docker/dockerfile:1.5
 
 # Stage 1: Build
-FROM node:20-bookworm-slim AS builder
+FROM node:16.16.0-bullseye-slim AS builder
 
 RUN apt-get update && apt-get install -y \
-    ca-certificates \
     zlib1g-dev \
     libpng-dev \
     libgl1 \
@@ -62,7 +61,7 @@ RUN --mount=type=cache,target=/root/.yarn YARN_CACHE_FOLDER=/root/.yarn yarn --f
 RUN yarn build
 
 # Stage 2: run
-FROM node:20-bookworm-slim
+FROM node:16.16.0-bullseye-slim
 WORKDIR /app
 COPY --from=builder /app/geomapviewer-main/.next ./.next
 COPY --from=builder /app/geomapviewer-main/public ./public

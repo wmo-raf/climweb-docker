@@ -93,6 +93,36 @@ CURRENT_CLIMWEB_VERSION=$(grep -E "^CLIMWEB_VERSION=" "$env_file" | awk -F'=' '{
 if [[ -z "$CURRENT_CLIMWEB_VERSION" ]]; then
   log_error "CLIMWEB_VERSION not found in $env_file"
   exit 1
+else
+  if [ "$NEW_CLIMWEB_VERSION" == "$CURRENT_CLIMWEB_VERSION" ]; then
+    echo "Current version: '$CURRENT_CLIMWEB_VERSION' and provided version: '$NEW_CLIMWEB_VERSION' are equal"
+  else
+    echo "********* Building climweb with new version $NEW_CLIMWEB_VERSION.... *************"
+
+    # disable exit on error
+    set +e
+
+    # build containers
+    docker pull ghcr.io/wmo-raf/climweb:v"$NEW_CLIMWEB_VERSION"
+
+    # Check the exit code
+    if [ $? -ne 0 ]; then
+      # restart climweb to reset upgrade status
+      docker compose restart climweb
+    else
+      echo "********* Updating env file.... *************"
+
+      # replacing CLIMWEB_VERSION
+      env_c=$(sed "s/^CLIMWEB_VERSION=.*/CLIMWEB_VERSION=$NEW_CLIMWEB_VERSION/" $env_file)
+      # write new env file
+      echo "$env_c" >$env_file
+
+      echo "********* Restarting containers.... *************"
+      # restart
+      docker compose pull
+      docker compose up -d --force-recreate
+    fi
+  fi
 fi
 
 log "Current version: $CURRENT_CLIMWEB_VERSION"

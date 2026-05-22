@@ -4,6 +4,7 @@ climweb/error.log
 climweb/cache/
 climweb/.cache/
 climweb/db-data/
+climweb/npm_ssl/
 climweb/backup/
 climweb/geomanager-data/
 
