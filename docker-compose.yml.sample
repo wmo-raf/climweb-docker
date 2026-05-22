@@ -119,6 +119,7 @@ services:
       - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media
       - ${BACKUP_VOLUME}:/climweb/web/src/climweb/backup
       - ${NPM_SSL_VOLUME:-./climweb/npm_ssl}:/npm/ssl
+      - ${CLIMWEB_PLUGIN_DIR:-./climweb/plugins}:/climweb/plugins
 
   climweb_celery_worker:
     image: climweb
@@ -143,7 +144,8 @@ services:
       - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media
       - ${BACKUP_VOLUME}:/climweb/web/src/climweb/backup
       - ${NPM_SSL_VOLUME:-./climweb/npm_ssl}:/npm/ssl
-      
+      - ${CLIMWEB_PLUGIN_DIR:-./climweb/plugins}:/climweb/plugins
+
   climweb_celery_beat:
     image: climweb
     container_name: climweb_celery_beat
@@ -165,6 +167,7 @@ services:
       - ${CMS_STATIC_VOLUME}:/climweb/web/src/climweb/static
       - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media
       - ${BACKUP_VOLUME}:/climweb/web/src/climweb/backup
+      - ${CLIMWEB_PLUGIN_DIR:-./climweb/plugins}:/climweb/plugins
 
   climweb_mapviewer:
     image: climweb_mapviewer

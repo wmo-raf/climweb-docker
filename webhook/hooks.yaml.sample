@@ -11,6 +11,12 @@
   trigger-rule:
     and:
       - match:
+          type: value
+          value: "UPGRADE_WEBHOOK_SECRET_PLACEHOLDER"
+          parameter:
+            source: header
+            name: X-Webhook-Secret
+      - match:
           type: regex
           regex: ^.+
           parameter:
