@@ -1,15 +1,11 @@
-- id: plugin-manage
-  execute-command: WORKING_DIR/webhook/scripts/plugin-manage.sh
+- id: plugin-remove
+  execute-command: WORKING_DIR/webhook/scripts/plugin-remove.sh
   command-working-directory: "WORKING_DIR"
-  response-message: "Plugin management command sent successfully"
+  response-message: "Plugin removal initiated"
   http-methods:
     - POST
   incoming-payload-content-type: "application/json"
   pass-arguments-to-command:
-    - source: payload
-      name: action
-    - source: payload
-      name: repo_url
     - source: payload
       name: plugin_name
   trigger-rule:
@@ -20,12 +16,6 @@
           parameter:
             source: header
             name: X-Webhook-Secret
-      - match:
-          type: regex
-          regex: ^(install|update|remove)$
-          parameter:
-            source: payload
-            name: action
       - match:
           type: regex
           regex: ^.+

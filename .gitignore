@@ -7,11 +7,13 @@ climweb/db-data/
 climweb/npm_ssl/
 climweb/backup/
 climweb/geomanager-data/
+climweb/plugins/
 
 mapviewer/.next/
 mapviewer/.cache/
 
 hooks.yaml
+logs/*.log
 .DS_Store
 
 

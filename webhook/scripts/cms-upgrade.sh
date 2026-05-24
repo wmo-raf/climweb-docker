@@ -8,10 +8,18 @@ set -euo pipefail
 
 # --- Configuration -----------------------------------------------------------
 env_file=".env"
-LOG_FILE="/var/log/climweb-upgrade.log"
+LOG_FILE="./logs/climweb-upgrade.log"
 LOCKFILE="/tmp/climweb-upgrade.lock"
+
+# Ensure docker is on PATH (supervisor runs with a minimal environment)
+export PATH="/Applications/Docker.app/Contents/Resources/bin:/usr/local/bin:/opt/homebrew/bin:/usr/bin:/bin:$PATH"
 HEALTH_CHECK_RETRIES=12   # 12 x 10s = 2 minutes
 HEALTH_CHECK_INTERVAL=10  # seconds between retries
+
+# Status file written into the backup volume so Django can read it
+BACKUP_VOLUME=$(grep -E "^BACKUP_VOLUME=" "$env_file" 2>/dev/null | cut -d'=' -f2- | tr -d '"' || true)
+BACKUP_DIR="${BACKUP_VOLUME:-./climweb/backup}"
+STATUS_FILE="$BACKUP_DIR/upgrade-status.json"
 
 # --- Logging -----------------------------------------------------------------
 log() {
@@ -39,10 +47,28 @@ notify() {
   fi
 }
 
+# --- Status file -------------------------------------------------------------
+write_status() {
+  local status="$1"   # in_progress | success | failed | rolling_back
+  local step="$2"     # human-readable description of current step
+
+  mkdir -p "$BACKUP_DIR"
+  cat > "$STATUS_FILE" << EOF
+{
+  "status": "$status",
+  "step": "$step",
+  "from_version": "${CURRENT_CLIMWEB_VERSION:-unknown}",
+  "to_version": "${NEW_CLIMWEB_VERSION:-unknown}",
+  "updated_at": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+}
+EOF
+}
+
 # --- Rollback ----------------------------------------------------------------
 _rollback() {
   local rollback_version="$1"
   log "Rolling back to v$rollback_version..."
+  write_status "rolling_back" "Rolling back to v$rollback_version..."
 
   # Restore version in .env
   local restored_env
@@ -54,6 +80,7 @@ _rollback() {
   docker compose up -d --force-recreate >> "$LOG_FILE" 2>&1 || true
 
   log_error "Rolled back to v$rollback_version. Manual intervention may be needed. Check $LOG_FILE."
+  write_status "failed" "Rolled back to v$rollback_version. Upgrade failed — check server logs."
   notify "ClimWeb upgrade FAILED — rolled back to v$rollback_version" \
     "Upgrade to v$NEW_CLIMWEB_VERSION failed. The system has been rolled back to v$rollback_version. Check $LOG_FILE for details."
 }
@@ -81,6 +108,7 @@ touch "$LOCKFILE"
 
 log "============================================================"
 log "Upgrade requested: $NEW_CLIMWEB_VERSION"
+write_status "in_progress" "Upgrade requested: v$NEW_CLIMWEB_VERSION"
 
 # --- Read current version from .env ------------------------------------------
 if [[ ! -f "$env_file" ]]; then
@@ -88,70 +116,44 @@ if [[ ! -f "$env_file" ]]; then
   exit 1
 fi
 
-CURRENT_CLIMWEB_VERSION=$(grep -E "^CLIMWEB_VERSION=" "$env_file" | awk -F'=' '{print $2}' | tr -d '"')
+CURRENT_CLIMWEB_VERSION=$(grep -E "^CLIMWEB_VERSION=" "$env_file" | cut -d'=' -f2- | tr -d '"')
 
 if [[ -z "$CURRENT_CLIMWEB_VERSION" ]]; then
   log_error "CLIMWEB_VERSION not found in $env_file"
   exit 1
-else
-  if [ "$NEW_CLIMWEB_VERSION" == "$CURRENT_CLIMWEB_VERSION" ]; then
-    echo "Current version: '$CURRENT_CLIMWEB_VERSION' and provided version: '$NEW_CLIMWEB_VERSION' are equal"
-  else
-    echo "********* Building climweb with new version $NEW_CLIMWEB_VERSION.... *************"
-
-    # disable exit on error
-    set +e
-
-    # build containers
-    docker pull ghcr.io/wmo-raf/climweb:v"$NEW_CLIMWEB_VERSION"
-
-    # Check the exit code
-    if [ $? -ne 0 ]; then
-      # restart climweb to reset upgrade status
-      docker compose restart climweb
-    else
-      echo "********* Updating env file.... *************"
-
-      # replacing CLIMWEB_VERSION
-      env_c=$(sed "s/^CLIMWEB_VERSION=.*/CLIMWEB_VERSION=$NEW_CLIMWEB_VERSION/" $env_file)
-      # write new env file
-      echo "$env_c" >$env_file
-
-      echo "********* Restarting containers.... *************"
-      # restart
-      docker compose pull
-      docker compose up -d --force-recreate
-    fi
-  fi
 fi
 
 log "Current version: $CURRENT_CLIMWEB_VERSION"
 
 if [[ "$NEW_CLIMWEB_VERSION" == "$CURRENT_CLIMWEB_VERSION" ]]; then
   log "Already on version $CURRENT_CLIMWEB_VERSION — nothing to do."
+  write_status "success" "Already on v$CURRENT_CLIMWEB_VERSION — nothing to do."
   exit 0
 fi
 
 # --- Read health check URL from .env -----------------------------------------
-CMS_HEALTHCHECK_URL=$(grep -E "^CMS_HEALTHCHECK_URL=" "$env_file" 2>/dev/null | awk -F'=' '{print $2}' | tr -d '"')
-CMS_PORT=$(grep -E "^CMS_PORT=" "$env_file" 2>/dev/null | awk -F'=' '{print $2}' | tr -d '"')
+CMS_HEALTHCHECK_URL=$(grep -E "^CMS_HEALTHCHECK_URL=" "$env_file" 2>/dev/null | cut -d'=' -f2- | tr -d '"' || true)
+CMS_PORT=$(grep -E "^CMS_PORT=" "$env_file" 2>/dev/null | cut -d'=' -f2- | tr -d '"' || true)
 CMS_PORT="${CMS_PORT:-80}"
 
 if [[ -z "$CMS_HEALTHCHECK_URL" ]]; then
-  CMS_HEALTHCHECK_URL="http://localhost:${CMS_PORT}/health/"
+  CMS_HEALTHCHECK_URL="http://localhost:${CMS_PORT}/api/_health/"
 fi
 
 # --- Pre-upgrade backup ------------------------------------------------------
 log "Taking pre-upgrade backup..."
+write_status "in_progress" "Taking pre-upgrade database backup..."
 if docker compose exec -T climweb climweb dbbackup --clean --noinput >> "$LOG_FILE" 2>&1; then
   log "Database backup complete."
 else
   log_error "Database backup failed. Aborting upgrade to protect data."
+  write_status "failed" "Database backup failed. Upgrade aborted to protect data."
   notify "ClimWeb upgrade ABORTED (v$CURRENT_CLIMWEB_VERSION → v$NEW_CLIMWEB_VERSION)" \
     "Pre-upgrade database backup failed. Upgrade was aborted. Check $LOG_FILE for details."
   exit 1
 fi
 
+write_status "in_progress" "Taking pre-upgrade media backup..."
 if docker compose exec -T climweb climweb mediabackup --clean --noinput >> "$LOG_FILE" 2>&1; then
   log "Media backup complete."
 else
@@ -160,11 +162,13 @@ fi
 
 # --- Pull new image from registry --------------------------------------------
 log "Pulling new image: ghcr.io/wmo-raf/climweb:v$NEW_CLIMWEB_VERSION ..."
+write_status "in_progress" "Pulling image ghcr.io/wmo-raf/climweb:v$NEW_CLIMWEB_VERSION..."
 
 env_content=$(sed "s/^CLIMWEB_VERSION=.*/CLIMWEB_VERSION=$NEW_CLIMWEB_VERSION/" "$env_file")
 
 if ! CLIMWEB_VERSION="$NEW_CLIMWEB_VERSION" docker compose pull climweb climweb_celery_worker climweb_celery_beat >> "$LOG_FILE" 2>&1; then
   log_error "Failed to pull image for version $NEW_CLIMWEB_VERSION. The registry may not have this tag yet."
+  write_status "failed" "Failed to pull image for v$NEW_CLIMWEB_VERSION. No changes were made."
   notify "ClimWeb upgrade FAILED (v$CURRENT_CLIMWEB_VERSION → v$NEW_CLIMWEB_VERSION)" \
     "Could not pull image for v$NEW_CLIMWEB_VERSION from the registry. No changes were made. Check $LOG_FILE for details."
   exit 1
@@ -178,6 +182,7 @@ echo "$env_content" > "$env_file"
 
 # --- Restart containers with new image ---------------------------------------
 log "Restarting containers..."
+write_status "in_progress" "Restarting containers with v$NEW_CLIMWEB_VERSION..."
 if ! docker compose up -d --force-recreate >> "$LOG_FILE" 2>&1; then
   log_error "docker compose up failed. Rolling back to v$CURRENT_CLIMWEB_VERSION..."
   _rollback "$CURRENT_CLIMWEB_VERSION"
@@ -186,6 +191,7 @@ fi
 
 # --- Post-upgrade health check -----------------------------------------------
 log "Waiting for application to become healthy at $CMS_HEALTHCHECK_URL ..."
+write_status "in_progress" "Waiting for application to become healthy..."
 
 healthy=false
 for ((i=1; i<=HEALTH_CHECK_RETRIES; i++)); do
@@ -194,6 +200,7 @@ for ((i=1; i<=HEALTH_CHECK_RETRIES; i++)); do
     break
   fi
   log "Health check attempt $i/$HEALTH_CHECK_RETRIES failed — retrying in ${HEALTH_CHECK_INTERVAL}s..."
+  write_status "in_progress" "Health check attempt $i/$HEALTH_CHECK_RETRIES — waiting for app to restart..."
   sleep "$HEALTH_CHECK_INTERVAL"
 done
 
@@ -205,6 +212,7 @@ fi
 
 # --- Success -----------------------------------------------------------------
 log_success "Upgrade from v$CURRENT_CLIMWEB_VERSION to v$NEW_CLIMWEB_VERSION completed successfully."
+write_status "success" "Upgrade to v$NEW_CLIMWEB_VERSION completed successfully."
 notify "ClimWeb upgraded successfully to v$NEW_CLIMWEB_VERSION" \
   "ClimWeb has been upgraded from v$CURRENT_CLIMWEB_VERSION to v$NEW_CLIMWEB_VERSION successfully."
 

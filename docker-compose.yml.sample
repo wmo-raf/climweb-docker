@@ -28,6 +28,7 @@ x-climweb-variables: &climweb-variables
   RECAPTCHA_VERIFY_REQUEST_TIMEOUT: ${RECAPTCHA_VERIFY_REQUEST_TIMEOUT:-60}
   NEXTJS_SERVER_URL: http://climweb_mapviewer:3000
   CMS_UPGRADE_HOOK_URL: ${CMS_UPGRADE_HOOK_URL}
+  CMS_PLUGIN_MANAGE_HOOK_URL: ${CMS_PLUGIN_MANAGE_HOOK_URL:-}
   WAGTAILADMIN_BASE_URL: ${CMS_BASE_URL}
   LANGUAGE_CODE: ${CMS_DEFAULT_LANGUAGE_CODE}
   CAP_CERT_PATH: ${CAP_CERT_PATH:-}
@@ -35,7 +36,7 @@ x-climweb-variables: &climweb-variables
   CAP_SIGNATURE_METHOD: ${CAP_SIGNATURE_METHOD:-ECDSA_SHA256}
   CAP_MQTT_SECRET_KEY: ${CAP_MQTT_SECRET_KEY:-}
   CLIMWEB_ADDITIONAL_APPS: ${CLIMWEB_ADDITIONAL_APPS:-}
-  CLIMWEB_PLUGIN_DIR: ${CLIMWEB_PLUGIN_DIR:-}
+  CLIMWEB_PLUGIN_DIR: /climweb/user-plugins
   CLIMWEB_PLUGIN_GIT_REPOS: ${CLIMWEB_PLUGIN_GIT_REPOS:-}
   CLIMWEB_PLUGIN_URLS: ${CLIMWEB_PLUGIN_URLS:-}
   WAGTAIL_2FA_REQUIRED: ${WAGTAIL_2FA_REQUIRED}
@@ -46,6 +47,7 @@ x-climweb-variables: &climweb-variables
   OTEL_TRACES_SAMPLER_ARG: ${OTEL_TRACES_SAMPLER_ARG:-0.1}
   OTEL_PER_MODULE_SAMPLER_OVERRIDES: ${OTEL_PER_MODULE_SAMPLER_OVERRIDES:-opentelemetry.instrumentation.django=always_on}
   CLIMWEB_DEPLOYMENT_ENV: ${CLIMWEB_DEPLOYMENT_ENV:-production}
+  MPLCONFIGDIR: /tmp/matplotlib
   IS_METEOROLOGICAL: ${IS_METEOROLOGICAL:-True}
 
 services:
@@ -112,7 +114,9 @@ services:
       - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media
       - ${BACKUP_VOLUME}:/climweb/web/src/climweb/backup
       - ${NPM_SSL_VOLUME:-./climweb/npm_ssl}:/npm/ssl
-      - ${CLIMWEB_PLUGIN_DIR:-./climweb/plugins}:/climweb/plugins
+      - ${CLIMWEB_PLUGIN_DIR:-./climweb/plugins}:/climweb/user-plugins
+    tmpfs:
+      - /climweb/container_markers
 
   climweb_celery_worker:
     image: ghcr.io/wmo-raf/climweb:v${CLIMWEB_VERSION}
@@ -130,7 +134,9 @@ services:
       - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media
       - ${BACKUP_VOLUME}:/climweb/web/src/climweb/backup
       - ${NPM_SSL_VOLUME:-./climweb/npm_ssl}:/npm/ssl
-      - ${CLIMWEB_PLUGIN_DIR:-./climweb/plugins}:/climweb/plugins
+      - ${CLIMWEB_PLUGIN_DIR:-./climweb/plugins}:/climweb/user-plugins
+    tmpfs:
+      - /climweb/container_markers
 
   climweb_celery_beat:
     image: ghcr.io/wmo-raf/climweb:v${CLIMWEB_VERSION}
@@ -147,10 +153,11 @@ services:
       - ${CMS_STATIC_VOLUME}:/climweb/web/src/climweb/static
       - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media
       - ${BACKUP_VOLUME}:/climweb/web/src/climweb/backup
-      - ${CLIMWEB_PLUGIN_DIR:-./climweb/plugins}:/climweb/plugins
+      - ${CLIMWEB_PLUGIN_DIR:-./climweb/plugins}:/climweb/user-plugins
+    tmpfs:
+      - /climweb/container_markers
 
   climweb_mapviewer:
-    image: climweb_mapviewer
     container_name: climweb_mapviewer
     restart: unless-stopped
     platform: linux/x86_64

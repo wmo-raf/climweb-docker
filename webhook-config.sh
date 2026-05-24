@@ -23,7 +23,7 @@ if [ ! -e "$env_file" ]; then
 fi
 
 # Use Django's SECRET_KEY as the webhook secret — already set in every installation.
-UPGRADE_WEBHOOK_SECRET=$(grep -E "^SECRET_KEY=" "$env_file" | awk -F'=' '{print $2}' | tr -d '"')
+UPGRADE_WEBHOOK_SECRET=$(grep -E "^SECRET_KEY=" "$env_file" | cut -d'=' -f2- | tr -d '"')
 
 if [ -z "$UPGRADE_WEBHOOK_SECRET" ]; then
     echo "SECRET_KEY is not set in $env_file. Please set it up before running this script."
