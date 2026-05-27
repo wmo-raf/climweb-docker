@@ -159,20 +159,13 @@ services:
 
   climweb_mapviewer:
     container_name: climweb_mapviewer
+    image: ghcr.io/wmo-raf/geomapviewer:latest
     restart: unless-stopped
     platform: linux/x86_64
-    build:
-      context: ./mapviewer
-      network: host
-      args:
-        - CMS_API=${MAPVIEWER_CMS_API}
-        - BASE_PATH=${MAPVIEWER_BASE_PATH}
-        - ASSET_PREFIX=${MAPVIEWER_ASSET_PREFIX}
-        - ANALYTICS_PROPERTY_ID=${ANALYTICS_PROPERTY_ID}
-        - BITLY_TOKEN=${BITLY_TOKEN}
-        - GOOGLE_CUSTOM_SEARCH_CX=${GOOGLE_CUSTOM_SEARCH_CX}
-        - GOOGLE_SEARCH_API_KEY=${GOOGLE_SEARCH_API_KEY}
-        - NEXT_TELEMETRY_DISABLED=1
+    environment:
+      CMS_API: ${MAPVIEWER_CMS_API}
+      ANALYTICS_PROPERTY_ID: ${ANALYTICS_PROPERTY_ID}
+      BASE_PATH: ${MAPVIEWER_BASE_PATH}
     volumes:
       - ${MAPVIEWER_NEXT_STATIC_VOLUME}:/app/nginx/.next/static
     ports:

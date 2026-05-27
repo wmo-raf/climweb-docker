@@ -76,7 +76,7 @@ _rollback() {
   echo "$restored_env" > "$env_file"
 
   # Pull and restart with the old image
-  CLIMWEB_VERSION="$rollback_version" docker compose pull climweb climweb_celery_worker climweb_celery_beat >> "$LOG_FILE" 2>&1 || true
+  CLIMWEB_VERSION="$rollback_version" docker compose pull >> "$LOG_FILE" 2>&1 || true
   docker compose up -d --force-recreate >> "$LOG_FILE" 2>&1 || true
 
   log_error "Rolled back to v$rollback_version. Manual intervention may be needed. Check $LOG_FILE."
@@ -166,7 +166,7 @@ write_status "in_progress" "Pulling image ghcr.io/wmo-raf/climweb:v$NEW_CLIMWEB_
 
 env_content=$(sed "s/^CLIMWEB_VERSION=.*/CLIMWEB_VERSION=$NEW_CLIMWEB_VERSION/" "$env_file")
 
-if ! CLIMWEB_VERSION="$NEW_CLIMWEB_VERSION" docker compose pull climweb climweb_celery_worker climweb_celery_beat >> "$LOG_FILE" 2>&1; then
+if ! CLIMWEB_VERSION="$NEW_CLIMWEB_VERSION" docker compose pull >> "$LOG_FILE" 2>&1; then
   log_error "Failed to pull image for version $NEW_CLIMWEB_VERSION. The registry may not have this tag yet."
   write_status "failed" "Failed to pull image for v$NEW_CLIMWEB_VERSION. No changes were made."
   notify "ClimWeb upgrade FAILED (v$CURRENT_CLIMWEB_VERSION → v$NEW_CLIMWEB_VERSION)" \
