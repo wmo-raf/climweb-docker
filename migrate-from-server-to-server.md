@@ -51,25 +51,27 @@ pwd
 
 ### Create the Latest Backup Snapshot
 
-```bash
-cd climweb
-docker compose exec climweb /bin/bash
-```
-
-Inside the container:
+From the `climweb-docker` directory, run:
 
 ```bash
-climweb dbbackup --clean --noinput
-climweb mediabackup --clean --noinput
-exit
+make backup
 ```
+
+This creates a DB backup, a media backup, and a `backup-manifest.json` that records the climweb version the backup was taken from. The `--clean` flag keeps only the latest copy of each.
+
+> **Manual alternative** (if you need to keep previous backups):
+> ```bash
+> bash scripts/backup.sh
+> ```
 
 ---
 
 ### Copy Backup Files to the New Server
 
+Copy the entire backup directory — this includes the DB dump, media archive, and the version manifest:
+
 ```bash
-scp climweb/backup/*.tar user@NEW_IP_ADDRESS:CLIMWEB_PATH/climweb/backup
+scp climweb/backup/* user@NEW_IP_ADDRESS:CLIMWEB_PATH/climweb/backup/
 ```
 
 ---
@@ -119,24 +121,12 @@ Save and exit:
 
 ---
 
-### Build and Start Containers
-
-```bash
-docker network ls
-docker compose up -d
-```
-
----
-
-### Fix Permissions for Backup,Static and Media Files
+### Fix Permissions for Backup, Static and Media Files
 
 ```bash
 sudo chown -R UID:GID climweb/static
-
 sudo chown -R UID:GID climweb/media
-
 sudo chown -R UID:GID climweb/backup
-
 sudo chown -R UID:GID climweb/plugins
 ```
 
@@ -144,45 +134,59 @@ sudo chown -R UID:GID climweb/plugins
 
 ---
 
-## 🔄 Restore Backup Files
-
-### Restore Database
+### Build and Start Containers
 
 ```bash
-docker compose exec climweb_db /bin/bash
+docker compose up -d
 ```
+
+Wait for all containers to be healthy before proceeding:
 
 ```bash
-psql -U <CMS_DB_USER> -d <CMS_DB_NAME>
-```
-
-> Replace `<CMS_DB_USER>` and `<CMS_DB_NAME>` with values from the `.env` file.
-
-Run:
-
-```sql
-DROP EXTENSION IF EXISTS postgis_topology;
-DROP EXTENSION IF EXISTS postgis_tiger_geocoder;
-```
-
-Exit:
-
-```bash
-exit
-exit
+docker compose ps
 ```
 
 ---
 
-### Restore Media and Database
+## 🔄 Restore Backup Files
+
+Run the restore script from the `climweb-docker` directory:
 
 ```bash
-docker compose exec climweb /bin/bash
+make restore
 ```
 
+Or equivalently:
+
 ```bash
-climweb mediarestore
-climweb dbrestore
+bash scripts/restore.sh
+```
+
+The script will:
+
+1. Read the `backup-manifest.json` to detect the backup's source version
+2. Warn you if the backup version differs from the currently running version
+3. Drop any blocking PostGIS extensions automatically
+4. Restore the database (`dbrestore`)
+5. **Run Django migrations** to reconcile the schema if the versions differ
+6. Restore media files (`mediarestore`)
+
+> **Restoring to a different climweb version** is fully supported. The `migrate` step
+> is what makes cross-version restores work — it applies any new migrations on top
+> of the restored database so the schema matches the running version.
+
+### Restore options
+
+| Flag | Effect |
+|------|--------|
+| `--db-only` | Skip media restore |
+| `--media-only` | Skip DB restore and migrations |
+| `--no-migrate` | Skip post-restore migrations (only safe when versions match) |
+
+Example — restore only the database, skip media:
+
+```bash
+bash scripts/restore.sh --db-only
 ```
 
 ---

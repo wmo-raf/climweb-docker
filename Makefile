@@ -1,7 +1,7 @@
 # Default container name
 CONTAINER=climweb
 
-.PHONY: setup start stop restart logs shell createsuperuser build down
+.PHONY: setup start stop restart logs shell createsuperuser build down backup restore
 
 setup:
 	bash setup.sh
@@ -39,3 +39,9 @@ generate_forecast:
 
 status:
 	docker compose ps
+
+backup:
+	bash scripts/backup.sh --clean
+
+restore:
+	bash scripts/restore.sh
