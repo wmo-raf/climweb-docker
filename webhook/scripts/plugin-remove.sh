@@ -7,7 +7,7 @@ set -euo pipefail
 #
 # Safely removes an installed plugin:
 #   1. Reverses its database migrations
-#   2. Deletes its directory from CLIMWEB_PLUGIN_DIR
+#   2. Deletes its directory from CLIMWEB_PLUGIN_VOLUME
 #   3. Removes its repo URL from CLIMWEB_PLUGIN_GIT_REPOS in .env
 #   4. Restarts containers
 # =============================================================================
@@ -55,9 +55,9 @@ fi
 touch "$LOCKFILE"
 
 # --- Resolve plugin directory ------------------------------------------------
-CLIMWEB_PLUGIN_DIR=$(grep -E "^CLIMWEB_PLUGIN_DIR=" "$env_file" 2>/dev/null | cut -d'=' -f2- | tr -d '"' || true)
-CLIMWEB_PLUGIN_DIR="${CLIMWEB_PLUGIN_DIR:-./climweb/plugins}"
-PLUGIN_PATH="$CLIMWEB_PLUGIN_DIR/$PLUGIN_NAME"
+CLIMWEB_PLUGIN_VOLUME=$(grep -E "^CLIMWEB_PLUGIN_VOLUME=" "$env_file" 2>/dev/null | cut -d'=' -f2- | tr -d '"' || true)
+CLIMWEB_PLUGIN_VOLUME="${CLIMWEB_PLUGIN_VOLUME:-./climweb/plugins}"
+PLUGIN_PATH="$CLIMWEB_PLUGIN_VOLUME/$PLUGIN_NAME"
 
 if [[ ! -d "$PLUGIN_PATH" ]]; then
   log_error "Plugin '$PLUGIN_NAME' not found at $PLUGIN_PATH."
