@@ -115,8 +115,10 @@ services:
       - ${BACKUP_VOLUME}:/climweb/web/src/climweb/backup
       - ${NPM_SSL_VOLUME:-./climweb/npm_ssl}:/npm/ssl
       - ${CLIMWEB_PLUGIN_DIR:-./climweb/plugins}:/climweb/user-plugins
-    tmpfs:
-      - /climweb/container_markers
+      - type: tmpfs
+        target: /climweb/container_markers
+        tmpfs:
+          mode: 0777
 
   climweb_celery_worker:
     image: ghcr.io/wmo-raf/climweb:v${CLIMWEB_VERSION}
@@ -135,8 +137,10 @@ services:
       - ${BACKUP_VOLUME}:/climweb/web/src/climweb/backup
       - ${NPM_SSL_VOLUME:-./climweb/npm_ssl}:/npm/ssl
       - ${CLIMWEB_PLUGIN_DIR:-./climweb/plugins}:/climweb/user-plugins
-    tmpfs:
-      - /climweb/container_markers
+      - type: tmpfs
+        target: /climweb/container_markers
+        tmpfs:
+          mode: 0777
 
   climweb_celery_beat:
     image: ghcr.io/wmo-raf/climweb:v${CLIMWEB_VERSION}
@@ -154,8 +158,10 @@ services:
       - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media
       - ${BACKUP_VOLUME}:/climweb/web/src/climweb/backup
       - ${CLIMWEB_PLUGIN_DIR:-./climweb/plugins}:/climweb/user-plugins
-    tmpfs:
-      - /climweb/container_markers
+      - type: tmpfs
+        target: /climweb/container_markers
+        tmpfs:
+          mode: 0777
 
   climweb_mapviewer:
     container_name: climweb_mapviewer
