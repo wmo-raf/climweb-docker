@@ -12,6 +12,13 @@ build:
 pull:
 	docker compose pull
 
+permit:
+	sudo chown -R 1001:1001 climweb/backup
+	sudo chown -R 1001:1001 climweb/static
+	sudo chown -R 1001:1001 climweb/plugins
+	sudo chown -R 1001:1001 climweb/media
+
+
 start:
 	docker compose pull && docker compose up -d 
 
