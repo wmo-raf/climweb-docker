@@ -46,6 +46,8 @@ cd climweb
 
 ```bash
 make setup
+
+make permit
 ```
 
 Input variables approriately when prompted. See [Environmental Variables](https://github.com/wmo-raf/climweb-docker/blob/main/environmental-variables.md#environmental-variables) 
