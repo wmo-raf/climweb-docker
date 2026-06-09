@@ -36,7 +36,7 @@ x-climweb-variables: &climweb-variables
   CAP_SIGNATURE_METHOD: ${CAP_SIGNATURE_METHOD:-ECDSA_SHA256}
   CAP_MQTT_SECRET_KEY: ${CAP_MQTT_SECRET_KEY:-}
   CLIMWEB_ADDITIONAL_APPS: ${CLIMWEB_ADDITIONAL_APPS:-}
-  CLIMWEB_PLUGIN_DIR: /climweb/user-plugins
+  CLIMWEB_PLUGIN_DIR: /climweb/plugins
   CLIMWEB_PLUGIN_GIT_REPOS: ${CLIMWEB_PLUGIN_GIT_REPOS:-}
   CLIMWEB_PLUGIN_URLS: ${CLIMWEB_PLUGIN_URLS:-}
   WAGTAIL_2FA_REQUIRED: ${WAGTAIL_2FA_REQUIRED}
@@ -99,6 +99,7 @@ services:
     user: "${UID}:${GID}"
     container_name: climweb
     platform: linux/x86_64
+    shm_size: '256mb'
     restart: unless-stopped
     expose:
       - 8000
@@ -157,7 +158,7 @@ services:
       - ${CMS_STATIC_VOLUME}:/climweb/web/src/climweb/static
       - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media
       - ${BACKUP_VOLUME}:/climweb/web/src/climweb/backup
-      - ${CLIMWEB_PLUGIN_VOLUME:-./climweb/plugins}:/climweb/user-plugins
+      - ${CLIMWEB_PLUGIN_VOLUME:-./climweb/plugins}:/climweb/plugins
       - type: tmpfs
         target: /climweb/container_markers
         tmpfs:
