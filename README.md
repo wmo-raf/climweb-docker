@@ -46,12 +46,15 @@ cd climweb
 
 ```bash
 make setup
+
 ```
 
 Input variables approriately when prompted. See [Environmental Variables](https://github.com/wmo-raf/climweb-docker/blob/main/environmental-variables.md#environmental-variables) 
 
 ```bash
 make start
+
+make permit
 ```
 
 Once successfully completed, the instance can be found at `http://{IP_ADDRESS/HOST}`
