@@ -115,7 +115,7 @@ services:
       - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media
       - ${BACKUP_VOLUME}:/climweb/web/src/climweb/backup
       - ${NPM_SSL_VOLUME:-./climweb/npm_ssl}:/npm/ssl
-      - ${CLIMWEB_PLUGIN_VOLUME:-./climweb/plugins}:/climweb/user-plugins
+      - ${CLIMWEB_PLUGIN_VOLUME:-./climweb/plugins}:/climweb/plugins
       - type: tmpfs
         target: /climweb/container_markers
         tmpfs:
@@ -137,7 +137,7 @@ services:
       - ${CMS_MEDIA_VOLUME}:/climweb/web/src/climweb/media
       - ${BACKUP_VOLUME}:/climweb/web/src/climweb/backup
       - ${NPM_SSL_VOLUME:-./climweb/npm_ssl}:/npm/ssl
-      - ${CLIMWEB_PLUGIN_VOLUME:-./climweb/plugins}:/climweb/user-plugins
+      - ${CLIMWEB_PLUGIN_VOLUME:-./climweb/plugins}:/climweb/plugins
       - type: tmpfs
         target: /climweb/container_markers
         tmpfs:
