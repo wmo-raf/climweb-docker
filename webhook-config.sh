@@ -23,11 +23,48 @@ if [ ! -e "$env_file" ]; then
 fi
 
 # Use Django's SECRET_KEY as the webhook secret — already set in every installation.
-UPGRADE_WEBHOOK_SECRET=$(grep -E "^SECRET_KEY=" "$env_file" | cut -d'=' -f2- | tr -d '"')
+#
+# This must parse the line exactly the way Docker Compose does when it interpolates
+# ${SECRET_KEY}, otherwise the CMS signs requests with one value while the hook
+# expects another. That means: honour surrounding quotes, strip a trailing inline
+# comment (whitespace followed by '#'), and tolerate CRLF line endings.
+# Note a bare '#' with no leading whitespace is a legal SECRET_KEY character and
+# is deliberately NOT treated as a comment.
+raw_secret=$(grep -E "^SECRET_KEY=" "$env_file" | head -n 1 | cut -d'=' -f2- | tr -d '\r')
+
+case "$raw_secret" in
+    '"'*)
+        UPGRADE_WEBHOOK_SECRET=${raw_secret#\"}
+        UPGRADE_WEBHOOK_SECRET=${UPGRADE_WEBHOOK_SECRET%%\"*}
+        ;;
+    "'"*)
+        UPGRADE_WEBHOOK_SECRET=${raw_secret#\'}
+        UPGRADE_WEBHOOK_SECRET=${UPGRADE_WEBHOOK_SECRET%%\'*}
+        ;;
+    *)
+        UPGRADE_WEBHOOK_SECRET=$(printf '%s' "$raw_secret" \
+            | sed -e 's/[[:space:]][[:space:]]*#.*$//' -e 's/[[:space:]][[:space:]]*$//')
+        ;;
+esac
 
 if [ -z "$UPGRADE_WEBHOOK_SECRET" ]; then
     echo "SECRET_KEY is not set in $env_file. Please set it up before running this script."
     exit 1
+fi
+
+# Whitespace surviving the parse above means the line is malformed in a way we have
+# not anticipated. Fail rather than silently install a secret the CMS will never send.
+case "$UPGRADE_WEBHOOK_SECRET" in
+    *[[:space:]]*)
+        echo "Parsed SECRET_KEY still contains whitespace — the line in $env_file looks malformed:"
+        echo "  SECRET_KEY=$raw_secret"
+        echo "Put the key on its own with no trailing comment, then re-run this script."
+        exit 1
+        ;;
+esac
+
+if [ "$UPGRADE_WEBHOOK_SECRET" != "$raw_secret" ]; then
+    echo "Note: trimmed quoting/comment from the SECRET_KEY line when reading $env_file."
 fi
 
 # new hooks file
