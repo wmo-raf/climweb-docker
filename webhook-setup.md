@@ -19,10 +19,17 @@ sudo apt-get install webhook
 From the root project directory (where you cloned this project) run:
 
 ```bash
-sh webhook-config.sh
+bash webhook-config.sh
 ```
 
+Run it with `bash`, not `sh` — on Debian/Ubuntu `sh` is `dash`, which does not support the
+parameter expansion the script uses and will fail with `Bad substitution`.
+
 This will create a new file `webhook/hooks.yaml` with the correct paths in place, using the `webhook/hooks.yaml.sample` file
+
+Re-run this script any time `SECRET_KEY` changes in `.env`, then restart webhook —
+otherwise the CMS will sign upgrade requests with a secret the hook no longer expects
+and every request will be rejected with `Hook rules were not satisfied`.
 
 We will use this file to run [Webhook](https://github.com/adnanh/webhook)
 
