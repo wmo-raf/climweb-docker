@@ -13,7 +13,7 @@ You need terminal access to the server with root (sudo) privileges, internet acc
 From the climweb-docker project directory (where `.env` lives):
 
 ```bash
-cd /path/to/climweb-docker
+cd climweb
 curl -fsSL https://raw.githubusercontent.com/wmo-raf/climweb-docker/main/migrate-to-registry.sh -o migrate-to-registry.sh
 sudo bash migrate-to-registry.sh --ssl-mode plain
 ```
