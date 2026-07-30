@@ -21,3 +21,4 @@ logs/*.log
 docker-compose.yml
 nginx/nginx.conf
 nginx/ssl/ssl.conf
+*.old
