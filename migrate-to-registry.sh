@@ -83,7 +83,27 @@ run() { log "+ $*"; "$@" >> "$LOG_FILE" 2>&1; }
 # --- .env helper ---------------------------------------------------------------
 env_file=".env"
 
-get_env() { grep -E "^$1=" "$env_file" 2>/dev/null | head -1 | cut -d'=' -f2- | tr -d '"'; }
+# Read a value from .env, following docker-compose's own parsing rules:
+#   - a quoted value is taken literally, up to the closing quote
+#   - an unquoted value ends at the first " #" (inline comment)
+#   - surrounding whitespace is trimmed
+# Naive `cut -f2- | tr -d '"'` kept inline comments, which produced things like
+#   CMS_BASE_URL="http://localhost" # UPDATE ME  ->  http://localhost # UPDATE ME
+# and then a corrupted healthcheck URL.
+get_env() {
+  local raw
+  raw="$(grep -E "^[[:space:]]*(export[[:space:]]+)?$1=" "$env_file" 2>/dev/null | head -1 | cut -d'=' -f2-)"
+  [[ -z "$raw" ]] && return 0
+  raw="${raw#"${raw%%[![:space:]]*}"}"          # strip leading whitespace
+  case "$raw" in
+    \"*) raw="${raw#\"}"; raw="${raw%%\"*}" ;;   # "quoted value" # comment
+    \'*) raw="${raw#\'}"; raw="${raw%%\'*}" ;;   # 'quoted value' # comment
+    *)   raw="${raw%%[[:space:]]#*}"            # bare value # comment
+         raw="${raw%"${raw##*[![:space:]]}"}"   # strip trailing whitespace
+         ;;
+  esac
+  printf '%s' "$raw"
+}
 
 set_env() {
   local key="$1" value="$2"
@@ -161,6 +181,11 @@ if [[ -z "$HEALTHCHECK_URL" ]]; then
   else
     HEALTHCHECK_URL="http://localhost:${CMS_PORT}/api/_health/"
   fi
+fi
+# Defensive: this value is curl'd and written back to .env unquoted, so a stray
+# space means .env parsing went wrong somewhere upstream.
+if [[ "$HEALTHCHECK_URL" == *[[:space:]]* ]]; then
+  fail "Derived healthcheck URL contains whitespace: '$HEALTHCHECK_URL'. Check CMS_BASE_URL in .env."
 fi
 log "Healthcheck URL: $HEALTHCHECK_URL"
 
