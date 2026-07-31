@@ -55,3 +55,14 @@ as `docker-compose.yml` file
 | ANALYTICS_PROPERTY_ID        |                                                                                                                                                                                      |
 | GOOGLE_CUSTOM_SEARCH_CX      |                                                                                                                                                                                      |
 | GOOGLE_SEARCH_API_KEY        |      |                                                 
+
+## Admin Log Viewer
+
+Lets CMS superusers read container logs from `Settings -> Server logs` instead of
+SSHing into the server. Off by default. See [setup-log-viewer.md](setup-log-viewer.md).
+
+| Variable                        | Description                                                                                                                                    | Required | Default                             |
+|---------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|:---------|:------------------------------------|
+| CLIMWEB_LOG_VIEWER_ENABLED      | Turn the admin log viewer on. Requires the `climweb_docker_proxy` service to be running.                                                        | NO       | False                               |
+| CLIMWEB_DOCKER_HOST             | Address of the read-only Docker socket proxy. Leave at the default unless you renamed the service.                                              | NO       | tcp://climweb_docker_proxy:2375     |
+| CLIMWEB_LOG_VIEWER_CONTAINERS   | Comma-separated allow-list of container names. When empty, any container whose name starts with `climweb` is readable.                          | NO       |                                     |
