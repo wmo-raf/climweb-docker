@@ -43,7 +43,9 @@ x-climweb-variables: &climweb-variables
   CLIMWEB_PLUGIN_DIR: /climweb/user-plugins
   CLIMWEB_PLUGIN_GIT_REPOS: ${CLIMWEB_PLUGIN_GIT_REPOS:-}
   CLIMWEB_PLUGIN_URLS: ${CLIMWEB_PLUGIN_URLS:-}
-  WAGTAIL_2FA_REQUIRED: ${WAGTAIL_2FA_REQUIRED}
+  # Note the :-True default: an unset variable would otherwise be passed through
+  # as an empty string, which django-environ parses as False.
+  WAGTAIL_2FA_REQUIRED: ${WAGTAIL_2FA_REQUIRED:-True}
   CLIMWEB_ENABLE_OTEL:
   OTEL_EXPORTER_OTLP_ENDPOINT: ${OTEL_EXPORTER_OTLP_ENDPOINT:-http://climweb_otel_collector:4318}
   OTEL_RESOURCE_ATTRIBUTES:
@@ -56,7 +58,7 @@ x-climweb-variables: &climweb-variables
   WAGTAIL_NEWSLETTER_MAILCHIMP_API_KEY: ${WAGTAIL_NEWSLETTER_MAILCHIMP_API_KEY:-}
   WAGTAIL_NEWSLETTER_FROM_NAME: ${WAGTAIL_NEWSLETTER_FROM_NAME:-}
   WAGTAIL_NEWSLETTER_REPLY_TO: ${WAGTAIL_NEWSLETTER_REPLY_TO:-}
-  CLIMWEB_LOG_VIEWER_ENABLED: ${CLIMWEB_LOG_VIEWER_ENABLED:-False}
+  CLIMWEB_LOG_VIEWER_ENABLED: ${CLIMWEB_LOG_VIEWER_ENABLED:-True}
   CLIMWEB_DOCKER_HOST: ${CLIMWEB_DOCKER_HOST:-tcp://climweb_docker_proxy:2375}
   CLIMWEB_LOG_VIEWER_CONTAINERS: ${CLIMWEB_LOG_VIEWER_CONTAINERS:-}
   
@@ -217,6 +219,29 @@ services:
       - ./otel/otel-collector-config.yaml:/etc/otel-collector-config.yaml
     ports:
       - "4318"
+
+  # Read-only Docker API for the CMS admin log viewer (Settings -> Server logs).
+  #
+  # The socket is mounted here and *only* here: the CMS container talks to this
+  # proxy over the internal network, so it can list containers and read their
+  # logs but cannot start, stop, exec into or create anything. Nothing is
+  # published to the host, so no new port or subdomain is exposed.
+  #
+  # Every capability defaults to off in this image; the two below are all the
+  # log viewer needs. Do not add EXEC, POST or ALLOW_RESTARTS — those turn a log
+  # reader into remote root on the host.
+  climweb_docker_proxy:
+    image: tecnativa/docker-socket-proxy:v0.4.2
+    container_name: climweb_docker_proxy
+    restart: unless-stopped
+    environment:
+      CONTAINERS: 1   # GET /containers/json and /containers/{id}/json
+      LOGS: 1         # GET /containers/{id}/logs
+      POST: 0         # block every mutating request
+    volumes:
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+    expose:
+      - 2375
 
 #networks:
   #default:

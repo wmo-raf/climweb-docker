@@ -59,10 +59,18 @@ as `docker-compose.yml` file
 ## Admin Log Viewer
 
 Lets CMS superusers read container logs from `Settings -> Server logs` instead of
-SSHing into the server. Off by default. See [setup-log-viewer.md](setup-log-viewer.md).
+SSHing into the server. On by default, but only takes effect where the
+`climweb_docker_proxy` service is running. See [setup-log-viewer.md](setup-log-viewer.md).
 
 | Variable                        | Description                                                                                                                                    | Required | Default                             |
 |---------------------------------|------------------------------------------------------------------------------------------------------------------------------------------------|:---------|:------------------------------------|
-| CLIMWEB_LOG_VIEWER_ENABLED      | Turn the admin log viewer on. Requires the `climweb_docker_proxy` service to be running.                                                        | NO       | False                               |
+| CLIMWEB_LOG_VIEWER_ENABLED      | Admin log viewer. On by default; set to `False` to hide it. Has no effect unless `CLIMWEB_DOCKER_HOST` points at a running proxy.               | NO       | True                                |
 | CLIMWEB_DOCKER_HOST             | Address of the read-only Docker socket proxy. Leave at the default unless you renamed the service.                                              | NO       | tcp://climweb_docker_proxy:2375     |
 | CLIMWEB_LOG_VIEWER_CONTAINERS   | Comma-separated allow-list of container names. When empty, any container whose name starts with `climweb` is readable.                          | NO       |                                     |
+
+## Two-factor authentication
+
+| Variable               | Description                                                                                                                                                                                                                                   | Required | Default |
+|------------------------|-------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------|:--------|
+| WAGTAIL_2FA_REQUIRED         | Require two-factor authentication for users granted the `wagtailadmin.enable_2fa` permission, and for anyone who has already enrolled a device. Ordinary editors without that permission are unaffected. Does **not** control superusers — see below.  | NO       | True    |
+| CLIMWEB_2FA_SUPERUSER_REQUIRED | Require two-factor authentication of superusers. Deliberately independent of `WAGTAIL_2FA_REQUIRED`, because instances built from the old `.env.sample` have that set to `False` in their `.env`. Set to `False` only to unstick a site that cannot enrol. | NO       | True    |

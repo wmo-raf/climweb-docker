@@ -33,27 +33,35 @@ Everything else, including `POST`, `EXEC` and `ALLOW_RESTARTS`, is off. The prox
 
 ## Enable it
 
-1. Pull the latest `docker-compose.yml` (it already contains the `climweb_docker_proxy`
-   service).
+It is on by default, so there is nothing to add to `.env`:
 
-2. Add to your `.env`:
+1. Pull the latest `docker-compose.yml` — it contains the `climweb_docker_proxy`
+   service and points the CMS at it.
 
-   ```bash
-   nano .env
-   ```
-
-   ```env
-   CLIMWEB_LOG_VIEWER_ENABLED=True
-   ```
-
-3. Restart:
+2. Restart:
 
    ```bash
    make restart
    ```
 
-4. Log into the CMS as a **superuser**. A **Server logs** item appears in the Settings
+3. Log into the CMS as a **superuser**. A **Server logs** item appears in the Settings
    menu. Non-superusers do not see it, and cannot reach the URL directly.
+
+The flag alone does not switch anything on: the viewer only appears where
+`CLIMWEB_DOCKER_HOST` points at a running proxy. An instance still on an older
+`docker-compose.yml` has neither, so the menu item stays hidden rather than showing an
+error — no action needed on those until they are upgraded.
+
+## Turn it off
+
+To disable it on an instance that does have the proxy, set:
+
+```env
+CLIMWEB_LOG_VIEWER_ENABLED=False
+```
+
+and `make restart`. The menu item disappears and the endpoints stop responding. To also
+stop mounting the Docker socket, comment out the `climweb_docker_proxy` service.
 
 ## Using it
 
