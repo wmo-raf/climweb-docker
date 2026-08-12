@@ -243,7 +243,13 @@ services:
     expose:
       - 2375
 
-#networks:
-  #default:
-    #external: true
-    #name: ${DOCKER_NETWORK_NAME:-climweb}
+# The stack joins a pre-existing external network rather than letting Compose
+# create a per-project one. This is required: nginx-proxy-manager (managed by a
+# separate compose file) hard-codes `external: true, name: climweb` to reach the
+# CMS. Leaving this commented out makes Compose create <project>_default instead,
+# and any container it does not recreate stays on the old network -- the stack
+# then half-splits across two networks and inter-container DNS fails.
+networks:
+  default:
+    external: true
+    name: ${DOCKER_NETWORK_NAME:-climweb}

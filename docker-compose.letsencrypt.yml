@@ -222,7 +222,7 @@ services:
     ports:
       - "4318"
 
-# networks:
-#   default:
-#     external: true
-#     name: ${DOCKER_NETWORK_NAME}
+networks:
+  default:
+    external: true
+    name: ${DOCKER_NETWORK_NAME:-climweb}
