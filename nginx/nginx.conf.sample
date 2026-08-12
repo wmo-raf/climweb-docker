@@ -71,7 +71,8 @@ http {
         resolver 127.0.0.11 valid=30s;
 
         location /runtime-config.js {
-            proxy_pass http://climweb_mapviewer:3000/runtime-config.js;
+            set $mapviewer climweb_mapviewer:3000;
+            proxy_pass http://$mapviewer/runtime-config.js;
 
             proxy_set_header Host $host;
             proxy_set_header X-Real-IP $remote_addr;
