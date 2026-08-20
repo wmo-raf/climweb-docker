@@ -49,6 +49,12 @@ make setup
 
 ```
 
+Create a docker network
+
+```bash
+docker network create climweb
+```
+
 Input variables approriately when prompted. See [Environmental Variables](https://github.com/wmo-raf/climweb-docker/blob/main/environmental-variables.md#environmental-variables) 
 
 ```bash
