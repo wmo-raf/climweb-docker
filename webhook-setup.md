@@ -54,12 +54,20 @@ Add the following inside the `webhook.conf` file
 
 ```conf
 [program:webhook]
-command=webhook -hooks /path_to_climweb_dir/webhook/hooks.yaml -verbose
+command=webhook -hooks /path_to_climweb_dir/webhook/hooks.yaml -hotreload -verbose
 autostart=true
 autorestart=true
 startretries=3
 startsecs=0
 ```
+
+`-hotreload` matters more than it looks. Without it, `webhook` reads the hook list
+once at startup, so every new server-side action the ClimWeb team ships would need
+someone to SSH in and restart the service. With it, `webhook` notices a changed
+`hooks.yaml` on its own, and the `self-update` task can install new actions from the
+CMS Admin with no terminal access. If your `webhook.conf` predates this flag, add it
+and run `sudo supervisorctl reread && sudo supervisorctl update` — or just press
+**self-update** in the admin, which repairs the config for you.
 
 Save the file.
 
@@ -73,6 +81,14 @@ sudo supervisorctl status
 
 If everything is ok, `Webhook` is now set and ready to be used.
 
+
+Set `CMS_TASK_HOOK_URL` as well:
+
+`http://host.docker.internal:9000/hooks/cms-task`
+
+That is the maintenance-task hook — the one that lets the CMS Admin run named jobs
+from `webhook/tasks/`, including `self-update`, which is how this server picks up
+future capabilities without anyone logging in. See `webhook/webhook.md`.
 
 You can now set the  `CMS_UPGRADE_HOOK_URL` env variable to:
 

@@ -39,7 +39,7 @@ set -uo pipefail
 
 # --- Defaults ----------------------------------------------------------------
 SSL_MODE="plain"
-PLUGIN_REPOS="https://github.com/fgg-consultant/dataset-helper-plugin"
+PLUGIN_REPOS=""
 TARGET_VERSION=""
 HEALTHCHECK_URL=""
 SKIP_BACKUP="false"
@@ -235,6 +235,7 @@ cp "$env_file" ".env.old"                                  && log "  .env.old"
 log "Patching .env ..."
 set_env CMS_UPGRADE_HOOK_URL "http://host.docker.internal:9000/hooks/cms-upgrade"
 set_env CMS_PLUGIN_MANAGE_HOOK_URL "http://host.docker.internal:9000/hooks/plugin-remove"
+set_env CMS_TASK_HOOK_URL "http://host.docker.internal:9000/hooks/cms-task"
 set_env CMS_HEALTHCHECK_URL "$HEALTHCHECK_URL"
 set_env CLIMWEB_PLUGIN_GIT_REPOS "$PLUGIN_REPOS"
 set_env CLIMWEB_PLUGIN_VOLUME "./climweb/plugins"
@@ -345,20 +346,38 @@ if ! command -v supervisorctl >/dev/null; then
   run apt-get install -y supervisor || rollback
 fi
 
-run sh webhook-config.sh || rollback
+# bash, not sh: webhook-config.sh uses parameter expansion that dash
+# cannot parse (it fails with 'Bad substitution').
+run bash webhook-config.sh || rollback
 
 SUPERVISOR_CONF="/etc/supervisor/conf.d/webhook.conf"
+
+# -hotreload is what makes every later capability installable without a shell:
+# webhook watches hooks.yaml and picks up new hooks by itself, so the
+# self-update task can add jobs to this server without anyone restarting it.
 if [[ ! -f "$SUPERVISOR_CONF" ]]; then
   log "Creating $SUPERVISOR_CONF ..."
   cat > "$SUPERVISOR_CONF" << EOF
 [program:webhook]
-command=$(command -v webhook) -hooks $(pwd)/webhook/hooks.yaml -verbose
+command=$(command -v webhook) -hooks $(pwd)/webhook/hooks.yaml -hotreload -verbose
 directory=$(pwd)
 autostart=true
 autorestart=true
 startretries=3
 startsecs=0
 EOF
+elif ! grep -q -- "-hotreload" "$SUPERVISOR_CONF"; then
+  # Written by an earlier version of this script, or by hand from the old
+  # setup guide. Add the flag rather than overwriting someone's config.
+  log "Adding -hotreload to the existing $SUPERVISOR_CONF ..."
+  cp "$SUPERVISOR_CONF" "$SUPERVISOR_CONF.pre-migrate-$TS"
+  if sed -i -E 's|^(command=.*webhook .*-hooks [^ ]+)(.*)$|\1 -hotreload\2|' "$SUPERVISOR_CONF" \
+     && grep -q -- "-hotreload" "$SUPERVISOR_CONF"; then
+    log "  -hotreload added."
+  else
+    log "  WARNING: could not add -hotreload automatically. Left the config as it was."
+    cp "$SUPERVISOR_CONF.pre-migrate-$TS" "$SUPERVISOR_CONF"
+  fi
 fi
 run supervisorctl reread
 run supervisorctl update

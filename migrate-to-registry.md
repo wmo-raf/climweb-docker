@@ -10,13 +10,23 @@ You need terminal access to the server with root (sudo) privileges, internet acc
 
 ## Run the migration
 
-From the climweb-docker project directory (where `.env` lives):
+Run this from the climweb-docker project directory -- the one that contains `.env`,
+`docker-compose.yml` and the `.git` folder, NOT the `climweb/` data folder inside it.
+The script refuses to run anywhere else.
 
 ```bash
-cd climweb
+cd /path/to/climweb-docker      # where .env lives
 curl -fsSL https://raw.githubusercontent.com/wmo-raf/climweb-docker/main/migrate-to-registry.sh -o migrate-to-registry.sh
-sudo bash migrate-to-registry.sh --ssl-mode plain
+sudo bash migrate-to-registry.sh --ssl-mode <plain|letsencrypt|npm|custom>
 ```
+
+**Choose `--ssl-mode` to match how this site currently serves HTTPS.** `plain` is
+correct only for instances served over plain HTTP on port 80. A site on Let's
+Encrypt needs `--ssl-mode letsencrypt`, one behind Nginx Proxy Manager needs `npm`,
+and one with a hand-managed certificate needs `custom`. Getting this wrong installs
+the wrong nginx config: the health check then fails and the script rolls back, but
+the site flaps in the meantime. If unsure, check for `ssl_certificate` in
+`nginx/nginx.conf` before running.
 
 The instance should already have been upgraded to the latest ClimWeb version from the CMS Admin before running this (the ClimWeb team will confirm when). The script then keeps the current version — same application, new deployment mechanism — which makes the migration much safer. Only pass `--version <X.Y.Z>` if the ClimWeb team explicitly asks you to change version during migration.
 

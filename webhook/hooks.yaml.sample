@@ -49,3 +49,37 @@
             source: payload
             name: latest_version
   trigger-rule-mismatch-http-response-code: 400
+
+# Generic maintenance-task hook.
+#
+# The CMS Admin posts {"task_name": "<name>"} and this runs the matching script
+# from webhook/tasks/<name>.sh -- and nothing else. The list of runnable tasks is
+# whatever is committed to that directory in this repo, so adding a capability is
+# a commit, never a remote fetch: no URL in a payload is ever executed.
+#
+# The dispatcher re-validates the name, so the regex below is defence in depth.
+- id: cms-task
+  execute-command: WORKING_DIR/webhook/scripts/cms-task.sh
+  command-working-directory: "WORKING_DIR"
+  response-message: "Task accepted"
+  http-methods:
+    - POST
+  incoming-payload-content-type: "application/json"
+  pass-arguments-to-command:
+    - source: payload
+      name: task_name
+  trigger-rule:
+    and:
+      - match:
+          type: value
+          value: "UPGRADE_WEBHOOK_SECRET_PLACEHOLDER"
+          parameter:
+            source: header
+            name: X-Webhook-Secret
+      - match:
+          type: regex
+          regex: ^[a-z0-9][a-z0-9-]{0,63}$
+          parameter:
+            source: payload
+            name: task_name
+  trigger-rule-mismatch-http-response-code: 400
