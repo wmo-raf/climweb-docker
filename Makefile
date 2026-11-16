@@ -19,8 +19,11 @@ permit:
 	sudo chown -R 1001:1001 climweb/media
 
 
+# A failed refresh must not stop the stack from starting: images already on
+# the server are used, and any that are missing are pulled by `up`.
 start:
-	docker compose pull && docker compose up -d 
+	docker compose pull --ignore-pull-failures
+	docker compose up -d
 
 stop:
 	docker compose stop
