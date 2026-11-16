@@ -80,6 +80,47 @@ fail()  { echo "[$(date -u +%Y-%m-%dT%H:%M:%SZ)] ERROR: $*" | tee -a "$LOG_FILE"
 
 run() { log "+ $*"; "$@" >> "$LOG_FILE" 2>&1; }
 
+# Registry calls can time out on slower links (Docker gives up after ~15s).
+# registry_run retries those, but stops at once on a missing tag or refused
+# access. On failure REGISTRY_ERROR is: network | not_found | auth
+REGISTRY_ATTEMPTS=4
+REGISTRY_ERROR=""
+registry_run() {
+  local attempt out delay
+  REGISTRY_ERROR=""
+  for ((attempt=1; attempt<=REGISTRY_ATTEMPTS; attempt++)); do
+    log "+ $* (attempt $attempt/$REGISTRY_ATTEMPTS)"
+    if out=$("$@" 2>&1); then
+      printf '%s\n' "$out" >> "$LOG_FILE"; return 0
+    fi
+    printf '%s\n' "$out" >> "$LOG_FILE"
+    if grep -qiE 'timeout|timed out|deadline exceeded|connection (refused|reset)|no such host|name resolution|network is unreachable|tls handshake|unexpected eof' <<<"$out"; then
+      REGISTRY_ERROR="network"
+    elif grep -qiE 'manifest unknown|not found|no such manifest' <<<"$out"; then
+      REGISTRY_ERROR="not_found"; return 1
+    elif grep -qiE 'unauthorized|denied|forbidden' <<<"$out"; then
+      REGISTRY_ERROR="auth"; return 1
+    else
+      REGISTRY_ERROR="network"
+    fi
+    if (( attempt < REGISTRY_ATTEMPTS )); then
+      delay=$((15 * attempt))
+      log "Registry did not respond, retrying in ${delay}s..."
+      sleep "$delay"
+    fi
+  done
+  return 1
+}
+
+registry_fail() {
+  local image="$1"
+  case "$REGISTRY_ERROR" in
+    not_found) fail "Image $image not found in the registry. Pass a valid --version." ;;
+    auth)      fail "The registry refused access to $image. If this server has an old ghcr.io login, run 'docker logout ghcr.io' and retry." ;;
+    *)         fail "Could not reach ghcr.io after $REGISTRY_ATTEMPTS attempts (network timeout) for $image. Check this server's connection to ghcr.io and retry. Nothing has been changed yet." ;;
+  esac
+}
+
 # --- .env helper ---------------------------------------------------------------
 env_file=".env"
 
@@ -154,9 +195,8 @@ log "ClimWeb version: current=$CURRENT_VERSION target=$DEPLOY_VERSION"
 
 # Verify the target image tag exists in the registry before touching anything
 log "Verifying image ghcr.io/wmo-raf/climweb:v$DEPLOY_VERSION exists..."
-if ! docker manifest inspect "ghcr.io/wmo-raf/climweb:v$DEPLOY_VERSION" >> "$LOG_FILE" 2>&1; then
-  fail "Image tag v$DEPLOY_VERSION not found in ghcr.io/wmo-raf/climweb. Pass a valid --version."
-fi
+registry_run docker manifest inspect "ghcr.io/wmo-raf/climweb:v$DEPLOY_VERSION" \
+  || registry_fail "ghcr.io/wmo-raf/climweb:v$DEPLOY_VERSION"
 
 if ! docker compose ps --status running 2>/dev/null | grep -q climweb; then
   log "WARNING: climweb containers do not appear to be running. Backup snapshot may fail."
@@ -169,8 +209,9 @@ OLD_GID="$(get_env GID)"
 # Pre-pull the new images while the old stack is still serving, to keep the
 # downtime window as short as possible.
 log "Pre-pulling registry images (site stays up during this)..."
-run docker pull "ghcr.io/wmo-raf/climweb:v$DEPLOY_VERSION" || fail "Failed to pull climweb image."
-run docker pull "ghcr.io/wmo-raf/geomapviewer:latest" || log "WARNING: could not pre-pull geomapviewer image."
+registry_run docker pull "ghcr.io/wmo-raf/climweb:v$DEPLOY_VERSION" \
+  || registry_fail "ghcr.io/wmo-raf/climweb:v$DEPLOY_VERSION"
+registry_run docker pull "ghcr.io/wmo-raf/geomapviewer:latest" || log "WARNING: could not pre-pull geomapviewer image."
 
 # Healthcheck URL: flag > derived from CMS_BASE_URL > localhost
 if [[ -z "$HEALTHCHECK_URL" ]]; then
