@@ -16,6 +16,10 @@ export PATH="/Applications/Docker.app/Contents/Resources/bin:/usr/local/bin:/opt
 HEALTH_CHECK_RETRIES=12   # 12 x 10s = 2 minutes
 HEALTH_CHECK_INTERVAL=10  # seconds between retries
 
+CLIMWEB_IMAGE_REPO="ghcr.io/wmo-raf/climweb"
+PULL_ATTEMPTS=4           # tries per image before giving up
+PULL_RETRY_DELAY=15       # seconds; grows each attempt (15s, 30s, 45s)
+
 # Status file written into the backup volume so Django can read it
 BACKUP_VOLUME=$(grep -E "^BACKUP_VOLUME=" "$env_file" 2>/dev/null | cut -d'=' -f2- | tr -d '"' || true)
 BACKUP_DIR="${BACKUP_VOLUME:-./climweb/backup}"
@@ -40,7 +44,9 @@ notify() {
   local body="$2"
 
   local admin_email
-  admin_email=$(grep -E "^CMS_ADMINS=" "$env_file" 2>/dev/null | awk -F'=' '{print $2}' | tr -d '"' | awk -F'<' '{print $2}' | tr -d '>')
+  # `|| true`: with no CMS_ADMINS in .env, grep fails and set -e/pipefail
+  # would otherwise abort the script here (even after a successful upgrade).
+  admin_email=$(grep -E "^CMS_ADMINS=" "$env_file" 2>/dev/null | awk -F'=' '{print $2}' | tr -d '"' | awk -F'<' '{print $2}' | tr -d '>' || true)
 
   if [[ -n "$admin_email" ]]; then
     echo "$body" | mail -s "$subject" "$admin_email" 2>/dev/null || true
@@ -64,6 +70,69 @@ write_status() {
 EOF
 }
 
+# --- Registry pulls ----------------------------------------------------------
+# Docker gives up on a registry that does not answer within ~15s. On slower
+# links ghcr.io can miss that window now and then, especially when compose
+# pulls every service at once. A single retry usually succeeds, so transient
+# failures are retried; a missing tag or refused access is not.
+
+# Sort a pull error into something an admin can act on:
+#   network | not_found | auth
+# Network patterns are checked first: they are the common case and the ones
+# worth retrying. Anything unrecognised is treated as network (retry).
+classify_pull_error() {
+  local out="$1"
+  if grep -qiE 'timeout|timed out|deadline exceeded|connection (refused|reset)|no such host|name resolution|network is unreachable|tls handshake|unexpected eof|i/o timeout' <<<"$out"; then
+    echo "network"
+  elif grep -qiE 'manifest unknown|manifest for .* not found|not found: manifest|no such manifest' <<<"$out"; then
+    echo "not_found"
+  elif grep -qiE 'unauthorized|denied|forbidden' <<<"$out"; then
+    echo "auth"
+  else
+    echo "network"
+  fi
+}
+
+# pull_with_retries <label> <command...>
+# Runs a pull command, retrying network failures with a growing delay.
+# On failure, PULL_ERROR_KIND says why (see classify_pull_error).
+PULL_ERROR_KIND=""
+pull_with_retries() {
+  local label="$1"; shift
+  local attempt out delay
+  PULL_ERROR_KIND=""
+  for ((attempt=1; attempt<=PULL_ATTEMPTS; attempt++)); do
+    if out=$("$@" 2>&1); then
+      printf '%s\n' "$out" >> "$LOG_FILE"
+      return 0
+    fi
+    printf '%s\n' "$out" >> "$LOG_FILE"
+    PULL_ERROR_KIND=$(classify_pull_error "$out")
+    # A missing tag or refused access will not fix itself; stop retrying.
+    [[ "$PULL_ERROR_KIND" == "network" ]] || return 1
+    if (( attempt < PULL_ATTEMPTS )); then
+      delay=$((PULL_RETRY_DELAY * attempt))
+      log "$label: registry did not respond (attempt $attempt/$PULL_ATTEMPTS). Retrying in ${delay}s..."
+      write_status "in_progress" "$label: registry did not respond, retrying in ${delay}s (attempt $attempt/$PULL_ATTEMPTS)..."
+      sleep "$delay"
+    fi
+  done
+  return 1
+}
+
+# Human-readable reason for the last failed pull of <image>.
+pull_failure_reason() {
+  local image="$1"
+  case "$PULL_ERROR_KIND" in
+    not_found)
+      echo "Image $image does not exist in the registry. The version may not be published yet." ;;
+    auth)
+      echo "The registry refused access to $image. If this server has an old ghcr.io login, run 'docker logout ghcr.io' and try again." ;;
+    *)
+      echo "Could not reach ghcr.io after $PULL_ATTEMPTS attempts (network timeout). Check this server's connection to ghcr.io and try again." ;;
+  esac
+}
+
 # --- Rollback ----------------------------------------------------------------
 _rollback() {
   local rollback_version="$1"
@@ -75,9 +144,18 @@ _rollback() {
   restored_env=$(sed "s/^CLIMWEB_VERSION=.*/CLIMWEB_VERSION=$rollback_version/" "$env_file")
   echo "$restored_env" > "$env_file"
 
-  # Pull and restart with the old image
-  CLIMWEB_VERSION="$rollback_version" docker compose pull >> "$LOG_FILE" 2>&1 || true
-  docker compose up -d --force-recreate >> "$LOG_FILE" 2>&1 || true
+  # Restart on the old image, which is normally still on this server (it was
+  # running moments ago). Do not run `docker compose pull` here: when the
+  # registry is unreachable it only delays recovery while the site is down,
+  # and it would refresh other services on moving tags (postgis, redis,
+  # geomapviewer), so the "rollback" would not restore what was running.
+  local rollback_image="$CLIMWEB_IMAGE_REPO:v$rollback_version"
+  if ! docker image inspect "$rollback_image" >/dev/null 2>&1; then
+    log "Image $rollback_image is not on this server, pulling it..."
+    pull_with_retries "Pulling $rollback_image" docker pull "$rollback_image" \
+      || log_error "Could not pull $rollback_image: $(pull_failure_reason "$rollback_image")"
+  fi
+  CLIMWEB_VERSION="$rollback_version" docker compose up -d --force-recreate >> "$LOG_FILE" 2>&1 || true
 
   log_error "Rolled back to v$rollback_version. Manual intervention may be needed. Check $LOG_FILE."
   write_status "failed" "Rolled back to v$rollback_version. Upgrade failed — check server logs."
@@ -140,6 +218,35 @@ if [[ -z "$CMS_HEALTHCHECK_URL" ]]; then
   CMS_HEALTHCHECK_URL="http://localhost:${CMS_PORT}/api/_health/"
 fi
 
+# --- Pull new image from registry --------------------------------------------
+# Done before the backups: pulling does not touch the running site, and if the
+# registry cannot be reached the upgrade stops here in seconds instead of after
+# the media backup (which can take 10+ minutes).
+NEW_IMAGE="$CLIMWEB_IMAGE_REPO:v$NEW_CLIMWEB_VERSION"
+log "Pulling new image: $NEW_IMAGE ..."
+write_status "in_progress" "Pulling image $NEW_IMAGE..."
+
+# 1. The ClimWeb image on its own. The upgrade cannot proceed without it, and
+#    one pull at a time is far more reliable on slow links than compose
+#    fetching every service in parallel.
+if ! pull_with_retries "Pulling $NEW_IMAGE" docker pull "$NEW_IMAGE"; then
+  reason=$(pull_failure_reason "$NEW_IMAGE")
+  log_error "Failed to pull $NEW_IMAGE. $reason"
+  write_status "failed" "Failed to pull image for v$NEW_CLIMWEB_VERSION. $reason No changes were made."
+  notify "ClimWeb upgrade FAILED (v$CURRENT_CLIMWEB_VERSION → v$NEW_CLIMWEB_VERSION)" \
+    "Could not pull $NEW_IMAGE. $reason No changes were made. Check $LOG_FILE for details."
+  exit 1
+fi
+
+# 2. The rest of the stack, one image at a time and best-effort: if one cannot
+#    be refreshed, the copy already on this server is used.
+if ! CLIMWEB_VERSION="$NEW_CLIMWEB_VERSION" COMPOSE_PARALLEL_LIMIT=1 \
+     docker compose pull --ignore-pull-failures >> "$LOG_FILE" 2>&1; then
+  log "WARNING: could not refresh some service images; existing local copies will be used."
+fi
+
+log "Image pull successful."
+
 # --- Pre-upgrade backup ------------------------------------------------------
 log "Taking pre-upgrade backup..."
 write_status "in_progress" "Taking pre-upgrade database backup..."
@@ -160,24 +267,9 @@ else
   log "Media backup failed — continuing (media can be re-synced if needed)."
 fi
 
-# --- Pull new image from registry --------------------------------------------
-log "Pulling new image: ghcr.io/wmo-raf/climweb:v$NEW_CLIMWEB_VERSION ..."
-write_status "in_progress" "Pulling image ghcr.io/wmo-raf/climweb:v$NEW_CLIMWEB_VERSION..."
-
-env_content=$(sed "s/^CLIMWEB_VERSION=.*/CLIMWEB_VERSION=$NEW_CLIMWEB_VERSION/" "$env_file")
-
-if ! CLIMWEB_VERSION="$NEW_CLIMWEB_VERSION" docker compose pull >> "$LOG_FILE" 2>&1; then
-  log_error "Failed to pull image for version $NEW_CLIMWEB_VERSION. The registry may not have this tag yet."
-  write_status "failed" "Failed to pull image for v$NEW_CLIMWEB_VERSION. No changes were made."
-  notify "ClimWeb upgrade FAILED (v$CURRENT_CLIMWEB_VERSION → v$NEW_CLIMWEB_VERSION)" \
-    "Could not pull image for v$NEW_CLIMWEB_VERSION from the registry. No changes were made. Check $LOG_FILE for details."
-  exit 1
-fi
-
-log "Image pull successful."
-
 # --- Update .env with new version --------------------------------------------
 log "Updating .env with new version..."
+env_content=$(sed "s/^CLIMWEB_VERSION=.*/CLIMWEB_VERSION=$NEW_CLIMWEB_VERSION/" "$env_file")
 echo "$env_content" > "$env_file"
 
 # --- Restart containers with new image ---------------------------------------
